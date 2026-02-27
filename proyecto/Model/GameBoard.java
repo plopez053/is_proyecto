@@ -1,4 +1,4 @@
-package proyecto.Model;
+package Model;
 
 public class GameBoard {
     private static GameBoard instance;

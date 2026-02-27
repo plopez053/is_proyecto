@@ -1,4 +1,4 @@
-package proyecto.Model;
+package Model;
 
 public class Casilla {
     private int x;

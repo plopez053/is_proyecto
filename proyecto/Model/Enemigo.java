@@ -1,4 +1,4 @@
-package proyecto.Model;
+package Model;
 
 public class Enemigo extends Casilla {
     public Enemigo(int x, int y) {

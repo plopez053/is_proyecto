@@ -1,4 +1,4 @@
-package proyecto.Model;
+package Model;
 
 public class Disparo extends Casilla {
     public Disparo(int x, int y) {

@@ -4,6 +4,8 @@ import java.awt.BorderLayout;
 import java.awt.EventQueue;
 import java.awt.Graphics;
 import java.awt.Image;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.net.URL;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -17,6 +19,7 @@ public class PantallaPrincipal extends JFrame {
 	private JPanel contentPane;
 	private JButton btnIniciar;
 	private Image backgroundImage;
+	private Controlador controlador;
 
 	/**
 	 * Launch the application.
@@ -59,10 +62,27 @@ public class PantallaPrincipal extends JFrame {
 		contentPane.setLayout(new BorderLayout(0, 0));
 		contentPane.add(getBtnIniciar(), BorderLayout.SOUTH);
 	}
-
+	private Controlador getControlador() {
+		if (controlador == null) {
+			controlador = new Controlador();
+		}
+		return controlador;
+	}
+	
+	private class Controlador implements ActionListener {
+		//Tras pulsar el botón, abrir la otra pantalla
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			PantallaJuego juego = new PantallaJuego();
+			setVisible(false);
+			juego.setVisible(true);
+		}
+	}
 	private JButton getBtnIniciar() {
 		if (btnIniciar == null) {
 			btnIniciar = new JButton("iniciar");
+			btnIniciar.addActionListener(getControlador());
+		
 		}
 		return btnIniciar;
 	}

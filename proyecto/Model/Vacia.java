@@ -1,4 +1,4 @@
-package proyecto.Model;
+package Model;
 
 public class Vacia extends Casilla {
     public Vacia(int x, int y) {
