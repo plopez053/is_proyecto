@@ -7,6 +7,8 @@ import java.awt.Graphics;
 import java.awt.GridLayout;
 import java.awt.Image;
 import java.net.URL;
+import java.util.Observable;
+import java.util.Observer;
 
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
@@ -14,7 +16,9 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
-public class PantallaJuego extends JFrame {
+import Model.GameBoard;
+
+public class PantallaJuego extends JFrame implements Observer{
 
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
@@ -44,6 +48,7 @@ public class PantallaJuego extends JFrame {
 	public PantallaJuego() {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 450, 300);
+		GameBoard.getGameBoard().addObserver(this); // Se añaden los observers
 		
 		URL imgUrl = PantallaPrincipal.class.getResource("img/fondo.jpg");
 		if (imgUrl != null) {
@@ -77,5 +82,11 @@ public class PantallaJuego extends JFrame {
 			}
 		}
 
+	}
+
+	@Override
+	public void update(Observable o, Object arg) {
+		// TODO Auto-generated method stub
+		
 	}
 }

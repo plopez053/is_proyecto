@@ -7,13 +7,18 @@ import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.net.URL;
+import java.util.Observable;
+import java.util.Observer;
+
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
-public class PantallaPrincipal extends JFrame {
+import Model.GameBoard;
+
+public class PantallaPrincipal extends JFrame implements Observer{
 
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
@@ -42,10 +47,10 @@ public class PantallaPrincipal extends JFrame {
 	public PantallaPrincipal() {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 450, 300);
+		GameBoard.getGameBoard().addObserver(this); // Se añaden los observers
 
 		URL imgUrl = PantallaPrincipal.class.getResource("img/fondo.jpg");
 		URL imgFondo = PantallaPrincipal.class.getResource("img/Space_invaders_logo.svg.png");
-		System.out.println(imgFondo!=null);
 		if (imgUrl != null) {
 			backgroundImage = new ImageIcon(imgUrl).getImage();
 		}
@@ -90,9 +95,7 @@ public class PantallaPrincipal extends JFrame {
 		//Tras pulsar el botón, abrir la otra pantalla
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			PantallaJuego juego = new PantallaJuego();
-			setVisible(false);
-			juego.setVisible(true);
+			GameBoard.getGameBoard().crearTablero();
 		}
 	}
 	private JButton getBtnIniciar() {
@@ -102,5 +105,16 @@ public class PantallaPrincipal extends JFrame {
 		
 		}
 		return btnIniciar;
+	}
+
+	@Override
+	public void update(Observable o, Object arg) {
+		int[] listo = (int[])arg;
+		if (o == GameBoard.getGameBoard() && listo[0] == 1) {
+			PantallaJuego juego = new PantallaJuego();
+			juego.setVisible(true);
+			dispose();
+			
+		}
 	}
 }

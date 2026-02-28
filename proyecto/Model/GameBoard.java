@@ -1,7 +1,9 @@
 package Model;
 
-public class GameBoard {
-    private static GameBoard instance;
+import java.util.Observable;
+
+public class GameBoard extends Observable{
+    private static GameBoard miGameBoard;
     private final int width = 100;
     private final int height = 60;
     private Casilla[][] matrix;
@@ -11,11 +13,11 @@ public class GameBoard {
         clearBoard();
     }
 
-    public static synchronized GameBoard getInstance() {
-        if (instance == null) {
-            instance = new GameBoard();
+    public static synchronized GameBoard getGameBoard() {
+        if (miGameBoard == null) {
+        	miGameBoard = new GameBoard();
         }
-        return instance;
+        return miGameBoard;
     }
 
     public int getWidth() {
@@ -45,5 +47,17 @@ public class GameBoard {
                 matrix[i][j] = new Vacia(j, i); // j is x, i is y
             }
         }
+    }
+    
+    public void crearTablero() {
+    	for (int i = 0; i<height;i++) {
+    		for (int j = 0; j<width;j++) {
+    			Casilla c = new Casilla(j,i);
+    			matrix[i][j] = c;
+    		}
+    	}
+    	setChanged();
+    	//Se crea el tablero inicializando la nave y creando los enemigos
+    	notifyObservers(new int[] {1});
     }
 }
