@@ -14,18 +14,17 @@ import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.border.EmptyBorder;
+import javax.swing.SwingUtilities;
 
 import Model.GameBoard;
 
-public class PantallaJuego extends JFrame implements Observer{
+public class PantallaJuego extends JFrame implements Observer {
 
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
 	private JPanel panel;
 	private Image backgroundImage;
-
-	
+	private JLabel[][] labels;
 
 	/**
 	 * Launch the application.
@@ -34,7 +33,7 @@ public class PantallaJuego extends JFrame implements Observer{
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					
+
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -47,10 +46,10 @@ public class PantallaJuego extends JFrame implements Observer{
 	 */
 	public PantallaJuego() {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 450, 300);
+		setBounds(100, 100, 1000, 700); // Much larger for 100x60 grid
 		GameBoard.getGameBoard().addObserver(this); // Se añaden los observers
-		
-		URL imgUrl = PantallaPrincipal.class.getResource("img/fondo.jpg");
+
+		URL imgUrl = PantallaJuego.class.getResource("img/fondo.jpg");
 		if (imgUrl != null) {
 			backgroundImage = new ImageIcon(imgUrl).getImage();
 		}
@@ -68,17 +67,18 @@ public class PantallaJuego extends JFrame implements Observer{
 		};
 		contentPane.setLayout(new BorderLayout());
 		setContentPane(contentPane);
-		panel = new JPanel(new GridLayout(60,100,0,0));
+		panel = new JPanel(new GridLayout(60, 100, 0, 0));
 		panel.setOpaque(false);
 		contentPane.add(panel, BorderLayout.CENTER);
 		int filas = 60;
 		int columnas = 100;
+		labels = new JLabel[filas][columnas];
 		for (int i = 0; i < filas; i++) {
-			for (int j=0; j<columnas;j++) {
+			for (int j = 0; j < columnas; j++) {
 				JLabel label = new JLabel();
 				label.setOpaque(false);
 				panel.add(label);
-				
+				labels[i][j] = label;
 			}
 		}
 
@@ -86,7 +86,24 @@ public class PantallaJuego extends JFrame implements Observer{
 
 	@Override
 	public void update(Observable o, Object arg) {
-		// TODO Auto-generated method stub
-		
+		if (o instanceof GameBoard && labels != null) {
+			GameBoard board = (GameBoard) o;
+			SwingUtilities.invokeLater(() -> {
+				for (int i = 0; i < board.getHeight(); i++) {
+					for (int j = 0; j < board.getWidth(); j++) {
+						Model.Casilla c = board.getCasilla(j, i);
+						boolean esEnemigo = (c instanceof Model.Enemigo);
+
+						if (labels[i][j].isOpaque() != esEnemigo) {
+							if (esEnemigo) {
+								labels[i][j].setBackground(Color.GREEN);
+							}
+							labels[i][j].setOpaque(esEnemigo);
+						}
+					}
+				}
+				panel.repaint();
+			});
+		}
 	}
 }

@@ -2,7 +2,7 @@ package Model;
 
 import java.util.Observable;
 
-public class GameBoard extends Observable{
+public class GameBoard extends Observable {
     private static GameBoard miGameBoard;
     private final int width = 100;
     private final int height = 60;
@@ -15,7 +15,7 @@ public class GameBoard extends Observable{
 
     public static synchronized GameBoard getGameBoard() {
         if (miGameBoard == null) {
-        	miGameBoard = new GameBoard();
+            miGameBoard = new GameBoard();
         }
         return miGameBoard;
     }
@@ -48,16 +48,27 @@ public class GameBoard extends Observable{
             }
         }
     }
-    
+
     public void crearTablero() {
-    	for (int i = 0; i<height;i++) {
-    		for (int j = 0; j<width;j++) {
-    			Casilla c = new Casilla(j,i);
-    			matrix[i][j] = c;
-    		}
-    	}
-    	setChanged();
-    	//Se crea el tablero inicializando la nave y creando los enemigos
-    	notifyObservers(new int[] {1});
+        EnemigoManager.getInstance().spawnEnemies();
+        for (int i = 0; i < height; i++) {
+            for (int j = 0; j < width; j++) {
+                Enemigo e = EnemigoManager.getInstance().getEnemigoEn(j, i);
+                if (e != null) {
+                    matrix[i][j] = e;
+                } else {
+                    matrix[i][j] = new Vacia(j, i);
+                }
+            }
+        }
+        EnemigoManager.getInstance().iniciarTimer();
+        setChanged();
+        // Se crea el tablero inicializando la nave y creando los enemigos
+        notifyObservers(new int[] { 1 });
+    }
+
+    public void actualizarTablero() {
+        setChanged();
+        notifyObservers();
     }
 }

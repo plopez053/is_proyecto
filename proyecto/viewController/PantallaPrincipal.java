@@ -18,7 +18,7 @@ import javax.swing.border.EmptyBorder;
 
 import Model.GameBoard;
 
-public class PantallaPrincipal extends JFrame implements Observer{
+public class PantallaPrincipal extends JFrame implements Observer {
 
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
@@ -67,54 +67,60 @@ public class PantallaPrincipal extends JFrame implements Observer{
 					g.drawImage(backgroundImage, 0, 0, getWidth(), getHeight(), this);
 				}
 				if (logoSI != null) {
-				    // Escalar proporcionalmente el logo a la mitad del ancho del panel
-				    int logoWidth = getWidth() / 2;
-				    int logoHeight = logoSI.getHeight(null) * logoWidth / logoSI.getWidth(null); // mantener proporción
-				    int x = (getWidth() - logoWidth) / 2; // centrar horizontal
-				    int y = getHeight() / 4;               // un poco hacia arriba
-				    g.drawImage(logoSI, x, y, logoWidth, logoHeight, this);
+					// Escalar proporcionalmente el logo a la mitad del ancho del panel
+					int logoWidth = getWidth() / 2;
+					int logoHeight = logoSI.getHeight(null) * logoWidth / logoSI.getWidth(null); // mantener proporción
+					int x = (getWidth() - logoWidth) / 2; // centrar horizontal
+					int y = getHeight() / 4; // un poco hacia arriba
+					g.drawImage(logoSI, x, y, logoWidth, logoHeight, this);
 				}
-				
+
 			}
 		};
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
 		contentPane.setLayout(new BorderLayout(0, 0));
 		contentPane.add(getBtnIniciar(), BorderLayout.SOUTH);
-		
+
 	}
-	
+
 	private Controlador getControlador() {
 		if (controlador == null) {
 			controlador = new Controlador();
 		}
 		return controlador;
 	}
-	
+
 	private class Controlador implements ActionListener {
-		//Tras pulsar el botón, abrir la otra pantalla
+		// Tras pulsar el botón, abrir la otra pantalla
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			GameBoard.getGameBoard().crearTablero();
 		}
 	}
+
 	private JButton getBtnIniciar() {
 		if (btnIniciar == null) {
 			btnIniciar = new JButton("iniciar");
 			btnIniciar.addActionListener(getControlador());
-		
+
 		}
 		return btnIniciar;
 	}
 
 	@Override
 	public void update(Observable o, Object arg) {
-		int[] listo = (int[])arg;
-		if (o == GameBoard.getGameBoard() && listo[0] == 1) {
-			PantallaJuego juego = new PantallaJuego();
-			juego.setVisible(true);
-			dispose();
-			
+		if (o == GameBoard.getGameBoard() && arg instanceof int[]) {
+			int[] listo = (int[]) arg;
+			if (listo[0] == 1) {
+				// Cuando el modelo está listo, creamos la pantalla de juego y cerramos la
+				// principal
+				PantallaJuego juego = new PantallaJuego();
+				juego.setVisible(true);
+				GameBoard.getGameBoard().deleteObserver(this);
+				dispose();
+			}
 		}
 	}
+
 }
