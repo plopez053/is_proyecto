@@ -115,7 +115,9 @@ public class PantallaPrincipal extends JFrame implements Observer {
 			if (listo[0] == 1) {
 				// Cuando el modelo está listo, creamos la pantalla de juego y cerramos la
 				// principal
-				PantallaJuego juego = new PantallaJuego();
+				int x = listo[2];
+				int y = listo[1];
+				PantallaJuego juego = new PantallaJuego(x,y);
 				juego.setVisible(true);
 				GameBoard.getGameBoard().deleteObserver(this);
 				dispose();

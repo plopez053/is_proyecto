@@ -10,6 +10,7 @@ import java.net.URL;
 import java.util.Observable;
 import java.util.Observer;
 
+import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -25,6 +26,8 @@ public class PantallaJuego extends JFrame implements Observer {
 	private JPanel panel;
 	private Image backgroundImage;
 	private JLabel[][] labels;
+	private int height = GameBoard.getGameBoard().getHeight();
+	private int width = GameBoard.getGameBoard().getWidth();
 
 	/**
 	 * Launch the application.
@@ -44,7 +47,7 @@ public class PantallaJuego extends JFrame implements Observer {
 	/**
 	 * Create the frame.
 	 */
-	public PantallaJuego() {
+	public PantallaJuego(int x, int y) {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 1000, 700); // Much larger for 100x60 grid
 		GameBoard.getGameBoard().addObserver(this); // Se añaden los observers
@@ -70,17 +73,19 @@ public class PantallaJuego extends JFrame implements Observer {
 		panel = new JPanel(new GridLayout(60, 100, 0, 0));
 		panel.setOpaque(false);
 		contentPane.add(panel, BorderLayout.CENTER);
-		int filas = 60;
-		int columnas = 100;
-		labels = new JLabel[filas][columnas];
-		for (int i = 0; i < filas; i++) {
-			for (int j = 0; j < columnas; j++) {
+		labels = new JLabel[height][width];
+		for (int i = 0; i < height; i++) {
+			for (int j = 0; j < width; j++) {
 				JLabel label = new JLabel();
 				label.setOpaque(false);
 				panel.add(label);
 				labels[i][j] = label;
 			}
 		}
+		JLabel labelN = labels[y][x];
+		labelN.setOpaque(true);
+		labelN.setBackground(Color.red);
+		labelN.setBorder(BorderFactory.createLineBorder(Color.gray));
 
 	}
 
@@ -97,11 +102,17 @@ public class PantallaJuego extends JFrame implements Observer {
 						if (labels[i][j].isOpaque() != esEnemigo) {
 							if (esEnemigo) {
 								labels[i][j].setBackground(Color.GREEN);
+								labels[i][j].setBorder(BorderFactory.createLineBorder(Color.gray));
 							}
 							labels[i][j].setOpaque(esEnemigo);
+							labels[i][j].setBorder(null);
+
 						}
 					}
 				}
+				int[] posN = (int[])arg;
+				labels[posN[0]][posN[1]].setBackground(Color.red);
+				labels[posN[0]][posN[1]].setOpaque(true);
 				panel.repaint();
 			});
 		}
