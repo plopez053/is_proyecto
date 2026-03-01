@@ -92,27 +92,30 @@ public class PantallaJuego extends JFrame implements Observer {
 	@Override
 	public void update(Observable o, Object arg) {
 		if (o instanceof GameBoard && labels != null) {
+			int[] posN = (int[])arg;
 			GameBoard board = (GameBoard) o;
 			SwingUtilities.invokeLater(() -> {
 				for (int i = 0; i < board.getHeight(); i++) {
 					for (int j = 0; j < board.getWidth(); j++) {
 						Model.Casilla c = board.getCasilla(j, i);
 						boolean esEnemigo = (c instanceof Model.Enemigo);
-
-						if (labels[i][j].isOpaque() != esEnemigo) {
-							if (esEnemigo) {
-								labels[i][j].setBackground(Color.GREEN);
-								labels[i][j].setBorder(BorderFactory.createLineBorder(Color.gray));
-							}
-							labels[i][j].setOpaque(esEnemigo);
+						boolean esNave = (i == posN[0] && j == posN[1]);
+						if(esNave) {
+							labels[i][j].setOpaque(true);
+							labels[i][j].setBackground(Color.red);
+							labels[i][j].setBorder(BorderFactory.createLineBorder(Color.gray));
+						}else if (esEnemigo) {
+							labels[i][j].setOpaque(true);
+							labels[i][j].setBackground(Color.GREEN);
+							labels[i][j].setBorder(BorderFactory.createLineBorder(Color.gray));
+						}else {
+							labels[i][j].setOpaque(false);
 							labels[i][j].setBorder(null);
+							
 
 						}
 					}
 				}
-				int[] posN = (int[])arg;
-				labels[posN[0]][posN[1]].setBackground(Color.red);
-				labels[posN[0]][posN[1]].setOpaque(true);
 				panel.repaint();
 			});
 		}
