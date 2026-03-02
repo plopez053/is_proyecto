@@ -7,7 +7,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class EnemigoManager {
-    private static EnemigoManager instance;
+    private static EnemigoManager miEnemigoManager;
     private List<Enemigo> enemigos;
     private Random random;
     private Timer timer;
@@ -17,11 +17,11 @@ public class EnemigoManager {
         random = new Random();
     }
 
-    public static EnemigoManager getInstance() {
-        if (instance == null) {
-            instance = new EnemigoManager();
+    public static EnemigoManager getEnemigoManager() {
+        if (miEnemigoManager == null) {
+            miEnemigoManager = new EnemigoManager();
         }
-        return instance;
+        return miEnemigoManager;
     }
 
     public void iniciarTimer() {

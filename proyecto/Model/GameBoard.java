@@ -54,7 +54,7 @@ public class GameBoard extends Observable {
     }
 
     public void crearTablero() {
-        EnemigoManager.getInstance().spawnEnemies();
+        EnemigoManager.getEnemigoManager().spawnEnemies();
         for (int i = 0; i < height; i++) {
             for (int j = 0; j < width; j++) {
             	Casilla c = new Casilla (j,i);
@@ -63,7 +63,7 @@ public class GameBoard extends Observable {
             		Nave nave = new Nave(j, i); // Crea el pixel central de la nave
             		naveC = new Casilla(j,i); // Crea un objeto que guarde las coordenadas de la nave
             	}
-                Enemigo e = EnemigoManager.getInstance().getEnemigoEn(j, i);
+                Enemigo e = EnemigoManager.getEnemigoManager().getEnemigoEn(j, i);
                 if (e != null) {
                     matrix[i][j] = e;
                 } else {
@@ -71,7 +71,7 @@ public class GameBoard extends Observable {
                 }
             }
         }
-        EnemigoManager.getInstance().iniciarTimer();
+        EnemigoManager.getEnemigoManager().iniciarTimer();
         setChanged();
         // Se crea el tablero inicializando la nave y creando los enemigos
         notifyObservers(new int[] {1, naveC.getX(), naveC.getY()});
