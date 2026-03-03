@@ -30,16 +30,11 @@ public class PantallaJuego extends JFrame implements Observer, KeyListener {
 	private JLabel[][] labels;
 	private int height = GameBoard.getGameBoard().getHeight();
 	private int width = GameBoard.getGameBoard().getWidth();
-	
 
-	/**
-	 * Launch the application.
-	 */
 	public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -47,17 +42,14 @@ public class PantallaJuego extends JFrame implements Observer, KeyListener {
 		});
 	}
 
-	/**
-	 * Create the frame.
-	 */
 	public PantallaJuego(int x, int y) {
 		addKeyListener(this);
 		setFocusable(true);
 		setFocusTraversalKeysEnabled(false);
 		requestFocusInWindow();
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 1000, 700); // Much larger for 100x60 grid
-		GameBoard.getGameBoard().addObserver(this); // Se añaden los observers
+		setBounds(100, 100, 1000, 700);
+		GameBoard.getGameBoard().addObserver(this);
 
 		URL imgUrl = PantallaJuego.class.getResource("img/fondo.jpg");
 		if (imgUrl != null) {
@@ -93,63 +85,62 @@ public class PantallaJuego extends JFrame implements Observer, KeyListener {
 		labelN.setOpaque(true);
 		labelN.setBackground(Color.red);
 		labelN.setBorder(BorderFactory.createLineBorder(Color.gray));
-
 	}
-	
+
+	@Override
 	public void keyPressed(KeyEvent e) {
+		GameBoard board = GameBoard.getGameBoard();
+		int key = e.getKeyCode();
 
-	    GameBoard board = GameBoard.getGameBoard();
-
-	    int key = e.getKeyCode();
-
-	    if (key == KeyEvent.VK_LEFT) {
-	        board.moverNave(-1);
-	    }
-
-	    if (key == KeyEvent.VK_RIGHT) {
-	        board.moverNave(1);
-	    }
-	    
-	    if(key == KeyEvent.VK_UP) {
-	    	board.moverNaveV(-1);
-	    }
-	    if(key == KeyEvent.VK_DOWN) {
-	    	board.moverNaveV(1);
-	    }
+		if (key == KeyEvent.VK_LEFT)
+			board.moverNave(-1, 0);
+		if (key == KeyEvent.VK_RIGHT)
+			board.moverNave(1, 0);
+		if (key == KeyEvent.VK_UP)
+			board.moverNave(0, -1);
+		if (key == KeyEvent.VK_DOWN)
+			board.moverNave(0, 1);
+		if (key == KeyEvent.VK_SPACE) {
+			if (board.getNave() != null) {
+				board.getNave().disparar();
+			}
+		}
 	}
+
+	@Override
 	public void keyReleased(KeyEvent e) {
-		//metodo que no hace absolutamente nada y que lo meto pq sino no furrula
 	}
-	
-	public void keyTyped(KeyEvent e) {
-		//mas de lo mismo
 
+	@Override
+	public void keyTyped(KeyEvent e) {
 	}
-	
+
 	@Override
 	public void update(Observable o, Object arg) {
 		if (o instanceof GameBoard && labels != null) {
-			int[] posN = (int[])arg;
 			GameBoard board = (GameBoard) o;
 			SwingUtilities.invokeLater(() -> {
 				for (int i = 0; i < board.getHeight(); i++) {
 					for (int j = 0; j < board.getWidth(); j++) {
 						Model.Casilla c = board.getCasilla(j, i);
-						boolean esEnemigo = (c instanceof Model.Enemigo);
-						boolean esNave = (i == posN[0] && j == posN[1]);
-						if(esNave) {
+						boolean esEnemigo = (c.getContenido() instanceof Model.Enemigo);
+						boolean esDisparo = (c.getContenido() instanceof Model.Disparo);
+						boolean esNave = (c.getContenido() instanceof Model.Nave);
+						if (esNave) {
 							labels[i][j].setOpaque(true);
 							labels[i][j].setBackground(Color.red);
 							labels[i][j].setBorder(BorderFactory.createLineBorder(Color.gray));
-						}else if (esEnemigo) {
+						} else if (esEnemigo) {
 							labels[i][j].setOpaque(true);
 							labels[i][j].setBackground(Color.GREEN);
 							labels[i][j].setBorder(BorderFactory.createLineBorder(Color.gray));
-						}else {
+						} else if (esDisparo) {
+							labels[i][j].setOpaque(true);
+							labels[i][j].setBackground(Color.YELLOW);
+							labels[i][j].setBorder(null);
+						} else {
 							labels[i][j].setOpaque(false);
 							labels[i][j].setBorder(null);
-							
-
 						}
 					}
 				}

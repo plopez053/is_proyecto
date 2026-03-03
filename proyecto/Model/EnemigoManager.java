@@ -82,17 +82,16 @@ public class EnemigoManager {
     public void moveEnemies() {
         GameBoard board = GameBoard.getGameBoard();
         for (Enemigo e : enemigos) {
-            board.setCasilla(e.getX(), e.getY(), new Vacia(e.getX(), e.getY()));
+            board.getCasilla(e.getX(), e.getY()).setContenido(null);
         }
 
         for (Enemigo e : enemigos) {
             int nextY = e.getY() + 1;
             if (nextY >= board.getHeight()) {
-                // detener timer cuando llegan al final
                 detenerTimer();
             } else {
                 e.setY(nextY);
-                board.setCasilla(e.getX(), e.getY(), e);
+                board.getCasilla(e.getX(), e.getY()).setContenido(e);
             }
         }
 
@@ -105,6 +104,6 @@ public class EnemigoManager {
 
     public void removeEnemigo(Enemigo e) {
         enemigos.remove(e);
-        GameBoard.getGameBoard().setCasilla(e.getX(), e.getY(), new Vacia(e.getX(), e.getY()));
+        GameBoard.getGameBoard().getCasilla(e.getX(), e.getY()).setContenido(null);
     }
 }

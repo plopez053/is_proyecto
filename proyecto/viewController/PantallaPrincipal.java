@@ -22,15 +22,11 @@ public class PantallaPrincipal extends JFrame implements Observer {
 
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
-	private JPanel panelLogo;
 	private JButton btnIniciar;
 	private Image backgroundImage;
 	private Image logoSI;
 	private Controlador controlador;
 
-	/**
-	 * Launch the application.
-	 */
 	public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
@@ -47,7 +43,7 @@ public class PantallaPrincipal extends JFrame implements Observer {
 	public PantallaPrincipal() {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 450, 300);
-		GameBoard.getGameBoard().addObserver(this); // Se añaden los observers
+		GameBoard.getGameBoard().addObserver(this);
 
 		URL imgUrl = PantallaPrincipal.class.getResource("img/fondo.jpg");
 		URL imgFondo = PantallaPrincipal.class.getResource("img/Space_invaders_logo.svg.png");
@@ -67,21 +63,18 @@ public class PantallaPrincipal extends JFrame implements Observer {
 					g.drawImage(backgroundImage, 0, 0, getWidth(), getHeight(), this);
 				}
 				if (logoSI != null) {
-					// Escalar proporcionalmente el logo a la mitad del ancho del panel
 					int logoWidth = getWidth() / 2;
-					int logoHeight = logoSI.getHeight(null) * logoWidth / logoSI.getWidth(null); // mantener proporción
-					int x = (getWidth() - logoWidth) / 2; // centrar horizontal
-					int y = getHeight() / 4; // un poco hacia arriba
+					int logoHeight = logoSI.getHeight(null) * logoWidth / logoSI.getWidth(null);
+					int x = (getWidth() - logoWidth) / 2;
+					int y = getHeight() / 4;
 					g.drawImage(logoSI, x, y, logoWidth, logoHeight, this);
 				}
-
 			}
 		};
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
 		contentPane.setLayout(new BorderLayout(0, 0));
 		contentPane.add(getBtnIniciar(), BorderLayout.SOUTH);
-
 	}
 
 	private Controlador getControlador() {
@@ -92,7 +85,6 @@ public class PantallaPrincipal extends JFrame implements Observer {
 	}
 
 	private class Controlador implements ActionListener {
-		// Tras pulsar el botón, abrir la otra pantalla
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			GameBoard.getGameBoard().crearTablero();
@@ -103,26 +95,22 @@ public class PantallaPrincipal extends JFrame implements Observer {
 		if (btnIniciar == null) {
 			btnIniciar = new JButton("iniciar");
 			btnIniciar.addActionListener(getControlador());
-
 		}
 		return btnIniciar;
 	}
 
 	@Override
 	public void update(Observable o, Object arg) {
-		if (o == GameBoard.getGameBoard() && arg instanceof int[]) {
+		if (o instanceof GameBoard && arg instanceof int[]) {
 			int[] listo = (int[]) arg;
 			if (listo[0] == 1) {
-				// Cuando el modelo está listo, creamos la pantalla de juego y cerramos la
-				// principal
 				int x = listo[2];
 				int y = listo[1];
-				PantallaJuego juego = new PantallaJuego(x,y);
+				PantallaJuego juego = new PantallaJuego(x, y);
 				juego.setVisible(true);
 				GameBoard.getGameBoard().deleteObserver(this);
 				dispose();
 			}
 		}
 	}
-
 }

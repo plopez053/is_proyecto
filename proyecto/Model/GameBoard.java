@@ -10,14 +10,14 @@ public class GameBoard extends Observable {
     private int posXInicio = 55;
     private int posYInicio = 50;
     private Casilla naveC;
-
+    private Nave nave;
 
     private GameBoard() {
         matrix = new Casilla[height][width];
         clearBoard();
     }
 
-    public static synchronized GameBoard getGameBoard() {
+    public static GameBoard getGameBoard() {
         if (miGameBoard == null) {
             miGameBoard = new GameBoard();
         }
@@ -48,58 +48,72 @@ public class GameBoard extends Observable {
     public void clearBoard() {
         for (int i = 0; i < height; i++) {
             for (int j = 0; j < width; j++) {
-                matrix[i][j] = new Vacia(j, i); // j is x, i is y
+                matrix[i][j] = new Casilla(j, i);
             }
         }
     }
 
     public void crearTablero() {
+        clearBoard();
         EnemigoManager.getEnemigoManager().spawnEnemies();
+
         for (int i = 0; i < height; i++) {
             for (int j = 0; j < width; j++) {
-            	Casilla c = new Casilla (j,i);
-            	matrix[i][j] = c;
-            	if (i == posYInicio && j == posXInicio) {
-            		Nave nave = new Nave(j, i); // Crea el pixel central de la nave
-            		naveC = new Casilla(j,i); // Crea un objeto que guarde las coordenadas de la nave
-            	}
+                Casilla c = matrix[i][j];
+
+                if (i == posYInicio && j == posXInicio) {
+                    nave = new NaveJugador();
+                    nave.setX(j);
+                    nave.setY(i);
+                    c.setContenido(nave);
+                    naveC = c;
+                }
+
                 Enemigo e = EnemigoManager.getEnemigoManager().getEnemigoEn(j, i);
                 if (e != null) {
-                    matrix[i][j] = e;
-                } else {
-                    matrix[i][j] = new Vacia(j, i);
+                    c.setContenido(e);
                 }
             }
         }
         EnemigoManager.getEnemigoManager().iniciarTimer();
         setChanged();
-        // Se crea el tablero inicializando la nave y creando los enemigos
-        notifyObservers(new int[] {1,naveC.getY(),naveC.getX()});
+        notifyObservers(new int[] { 1, naveC.getY(), naveC.getX() });
     }
 
     public void actualizarTablero() {
         setChanged();
-        notifyObservers(new int[] {naveC.getY(),naveC.getX()});
+        if (naveC != null) {
+            notifyObservers(new int[] { naveC.getY(), naveC.getX() });
+        }
     }
-    
-    public void moverNave(int direccion) {
 
-        int nuevaX = naveC.getX() + direccion;
+    public void moverNave(int dx, int dy) {
+        if (naveC == null)
+            return;
+        int nuevaX = naveC.getX() + dx;
+        int nuevaY = naveC.getY() + dy;
 
-        
-        if (nuevaX >= 0 && nuevaX < width) {
-            naveC = new Casilla(nuevaX, naveC.getY());
+        if (nuevaX >= 0 && nuevaX < width && nuevaY >= 0 && nuevaY < height) {
+            Entidad ent = naveC.getContenido();
+            if (ent != null) {
+                ent.setX(nuevaX);
+                ent.setY(nuevaY);
+            }
+            naveC.setContenido(null);
+            naveC = matrix[nuevaY][nuevaX];
+            naveC.setContenido(ent);
             actualizarTablero();
         }
     }
-    public void moverNaveV(int direccion) {
 
-        int nuevaY = naveC.getY() + direccion;
-
-        // límites del tablero
-        if (nuevaY >= 0 && nuevaY < height) {
-            naveC = new Casilla(naveC.getX(), nuevaY);
-            actualizarTablero();
+    public void eliminarEnemigoEn(int x, int y) {
+        Enemigo e = EnemigoManager.getEnemigoManager().getEnemigoEn(x, y);
+        if (e != null) {
+            EnemigoManager.getEnemigoManager().removeEnemigo(e);
         }
+    }
+
+    public Nave getNave() {
+        return nave;
     }
 }
