@@ -74,11 +74,32 @@ public class GameBoard extends Observable {
         EnemigoManager.getEnemigoManager().iniciarTimer();
         setChanged();
         // Se crea el tablero inicializando la nave y creando los enemigos
-        notifyObservers(new int[] {1, naveC.getX(), naveC.getY()});
+        notifyObservers(new int[] {1,naveC.getY(),naveC.getX()});
     }
 
     public void actualizarTablero() {
         setChanged();
-        notifyObservers(new int[] {naveC.getX(), naveC.getY()});
+        notifyObservers(new int[] {naveC.getY(),naveC.getX()});
+    }
+    
+    public void moverNave(int direccion) {
+
+        int nuevaX = naveC.getX() + direccion;
+
+        
+        if (nuevaX >= 0 && nuevaX < width) {
+            naveC = new Casilla(nuevaX, naveC.getY());
+            actualizarTablero();
+        }
+    }
+    public void moverNaveV(int direccion) {
+
+        int nuevaY = naveC.getY() + direccion;
+
+        // límites del tablero
+        if (nuevaY >= 0 && nuevaY < height) {
+            naveC = new Casilla(naveC.getX(), nuevaY);
+            actualizarTablero();
+        }
     }
 }

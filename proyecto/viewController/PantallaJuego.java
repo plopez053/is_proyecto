@@ -6,6 +6,8 @@ import java.awt.EventQueue;
 import java.awt.Graphics;
 import java.awt.GridLayout;
 import java.awt.Image;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.net.URL;
 import java.util.Observable;
 import java.util.Observer;
@@ -19,7 +21,7 @@ import javax.swing.SwingUtilities;
 
 import Model.GameBoard;
 
-public class PantallaJuego extends JFrame implements Observer {
+public class PantallaJuego extends JFrame implements Observer, KeyListener {
 
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
@@ -28,6 +30,7 @@ public class PantallaJuego extends JFrame implements Observer {
 	private JLabel[][] labels;
 	private int height = GameBoard.getGameBoard().getHeight();
 	private int width = GameBoard.getGameBoard().getWidth();
+	
 
 	/**
 	 * Launch the application.
@@ -48,6 +51,10 @@ public class PantallaJuego extends JFrame implements Observer {
 	 * Create the frame.
 	 */
 	public PantallaJuego(int x, int y) {
+		addKeyListener(this);
+		setFocusable(true);
+		setFocusTraversalKeysEnabled(false);
+		requestFocusInWindow();
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 1000, 700); // Much larger for 100x60 grid
 		GameBoard.getGameBoard().addObserver(this); // Se añaden los observers
@@ -88,7 +95,37 @@ public class PantallaJuego extends JFrame implements Observer {
 		labelN.setBorder(BorderFactory.createLineBorder(Color.gray));
 
 	}
+	
+	public void keyPressed(KeyEvent e) {
 
+	    GameBoard board = GameBoard.getGameBoard();
+
+	    int key = e.getKeyCode();
+
+	    if (key == KeyEvent.VK_LEFT) {
+	        board.moverNave(-1);
+	    }
+
+	    if (key == KeyEvent.VK_RIGHT) {
+	        board.moverNave(1);
+	    }
+	    
+	    if(key == KeyEvent.VK_UP) {
+	    	board.moverNaveV(-1);
+	    }
+	    if(key == KeyEvent.VK_DOWN) {
+	    	board.moverNaveV(1);
+	    }
+	}
+	public void keyReleased(KeyEvent e) {
+		//metodo que no hace absolutamente nada y que lo meto pq sino no furrula
+	}
+	
+	public void keyTyped(KeyEvent e) {
+		//mas de lo mismo
+
+	}
+	
 	@Override
 	public void update(Observable o, Object arg) {
 		if (o instanceof GameBoard && labels != null) {
