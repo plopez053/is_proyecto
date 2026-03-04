@@ -23,7 +23,6 @@ import javax.swing.SwingUtilities;
 
 import Model.GameBoard;
 
-
 public class PantallaJuego extends JFrame implements Observer {
 
 	private static final long serialVersionUID = 1L;
@@ -34,7 +33,6 @@ public class PantallaJuego extends JFrame implements Observer {
 	private int height = GameBoard.getGameBoard().getHeight();
 	private int width = GameBoard.getGameBoard().getWidth();
 	private Controlador2 controlador2;
-	
 
 	/**
 	 * Launch the application.
@@ -99,9 +97,10 @@ public class PantallaJuego extends JFrame implements Observer {
 		labelN.setBorder(BorderFactory.createLineBorder(Color.gray));
 
 	}
+
 	private Controlador2 getControlador2() {
 		if (controlador2 == null) {
-			controlador2= new Controlador2();
+			controlador2 = new Controlador2();
 		}
 		return controlador2;
 	}
@@ -111,72 +110,79 @@ public class PantallaJuego extends JFrame implements Observer {
 		@Override
 		public void keyPressed(KeyEvent e) {
 
-		    GameBoard board = GameBoard.getGameBoard();
+			GameBoard board = GameBoard.getGameBoard();
 
-		    int key = e.getKeyCode();
+			int key = e.getKeyCode();
 
-		    if (key == KeyEvent.VK_LEFT) {
-		        board.moverNave(-1);
-		    }
+			if (key == KeyEvent.VK_LEFT) {
+				board.moverNave(-1);
+			}
 
-		    if (key == KeyEvent.VK_RIGHT) {
-		        board.moverNave(1);
-		    }
-		    
-		    if(key == KeyEvent.VK_UP) {
-		    	board.moverNaveV(-1);
-		    }
-		    if(key == KeyEvent.VK_DOWN) {
-		    	board.moverNaveV(1);
-		    }
-	}
+			if (key == KeyEvent.VK_RIGHT) {
+				board.moverNave(1);
+			}
+
+			if (key == KeyEvent.VK_UP) {
+				board.moverNaveV(-1);
+			}
+			if (key == KeyEvent.VK_DOWN) {
+				board.moverNaveV(1);
+			}
+
+			if (key == KeyEvent.VK_SPACE) {
+				board.disparar();
+			}
+		}
 
 		@Override
 		public void keyTyped(KeyEvent e) {
 			// TODO Auto-generated method stub
-			
+
 		}
 
 		@Override
 		public void keyReleased(KeyEvent e) {
 			// TODO Auto-generated method stub
-			
+
 		}
-	
-	}
-	
-	public void keyReleased(KeyEvent e) {
-		//metodo que no hace absolutamente nada y que lo meto pq sino no furrula
-	}
-	
-	public void keyTyped(KeyEvent e) {
-		//mas de lo mismo
 
 	}
-	
+
+	public void keyReleased(KeyEvent e) {
+		// metodo que no hace absolutamente nada y que lo meto pq sino no furrula
+	}
+
+	public void keyTyped(KeyEvent e) {
+		// mas de lo mismo
+
+	}
+
 	@Override
 	public void update(Observable o, Object arg) {
 		if (o instanceof GameBoard && labels != null) {
-			int[] posN = (int[])arg;
+			int[] posN = (int[]) arg;
 			GameBoard board = (GameBoard) o;
 			SwingUtilities.invokeLater(() -> {
 				for (int i = 0; i < board.getHeight(); i++) {
 					for (int j = 0; j < board.getWidth(); j++) {
-					Model.Casilla c = board.getCasilla(j, i);
-					boolean esEnemigo = (c instanceof Model.Enemigo);
+						Model.Casilla c = board.getCasilla(j, i);
+						boolean esEnemigo = (c instanceof Model.Enemigo);
 						boolean esNave = (i == posN[0] && j == posN[1]);
-						if(esNave) {
+						if (esNave) {
 							labels[i][j].setOpaque(true);
 							labels[i][j].setBackground(Color.red);
 							labels[i][j].setBorder(BorderFactory.createLineBorder(Color.gray));
-						}else if (esEnemigo) {
+						} else if (esEnemigo) {
 							labels[i][j].setOpaque(true);
 							labels[i][j].setBackground(Color.GREEN);
 							labels[i][j].setBorder(BorderFactory.createLineBorder(Color.gray));
-						}else {
+						} else if (c instanceof Model.Disparo) {
+							labels[i][j].setOpaque(true);
+							labels[i][j].setBackground(Color.YELLOW);
+							labels[i][j].setBorder(BorderFactory.createLineBorder(Color.gray));
+						} else {
 							labels[i][j].setOpaque(false);
 							labels[i][j].setBorder(null);
-							
 
 						}
 					}

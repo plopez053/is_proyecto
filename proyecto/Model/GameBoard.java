@@ -11,7 +11,6 @@ public class GameBoard extends Observable {
     private int posYInicio = 55;
     private Nave naveC;
 
-
     private GameBoard() {
         matrix = new Casilla[height][width];
         clearBoard();
@@ -57,11 +56,11 @@ public class GameBoard extends Observable {
         EnemigoManager.getEnemigoManager().spawnEnemies();
         for (int i = 0; i < height; i++) {
             for (int j = 0; j < width; j++) {
-            	Casilla c = new Casilla (j,i);
-            	matrix[i][j] = c;
-            	if (i == posYInicio && j == posXInicio) {
-            		naveC = new Nave(j,i); // Crea un objeto que guarde las coordenadas de la nave
-            	}
+                Casilla c = new Casilla(j, i);
+                matrix[i][j] = c;
+                if (i == posYInicio && j == posXInicio) {
+                    naveC = new Nave(j, i); // Crea un objeto que guarde las coordenadas de la nave
+                }
                 Enemigo e = EnemigoManager.getEnemigoManager().getEnemigoEn(j, i);
                 if (e != null) {
                     matrix[i][j] = e;
@@ -73,44 +72,69 @@ public class GameBoard extends Observable {
         EnemigoManager.getEnemigoManager().iniciarTimer();
         setChanged();
         // Se crea el tablero inicializando la nave y creando los enemigos
-        notifyObservers(new int[] {1,naveC.getY(),naveC.getX()});
+        notifyObservers(new int[] { 1, naveC.getY(), naveC.getX() });
     }
 
     public void actualizarTablero() {
         setChanged();
-        notifyObservers(new int[] {naveC.getY(),naveC.getX()});
+        notifyObservers(new int[] { naveC.getY(), naveC.getX() });
     }
-    
+
     public void moverNave(int direccion) {
 
         int nuevaX = naveC.getX() + direccion;
 
-        
-        if (dentroRango(nuevaX,naveC.getY())) {
-        	matrix[naveC.getY()][naveC.getX()] = new Vacia(naveC.getX(), naveC.getY());
-        	naveC.moverNave(nuevaX);
-        	matrix[naveC.getY()][naveC.getX()] = naveC;
+        if (dentroRango(nuevaX, naveC.getY())) {
+            matrix[naveC.getY()][naveC.getX()] = new Vacia(naveC.getX(), naveC.getY());
+            naveC.moverNave(nuevaX);
+            matrix[naveC.getY()][naveC.getX()] = naveC;
             actualizarTablero();
         }
     }
+
     public void moverNaveV(int direccion) {
 
         int nuevaY = naveC.getY() + direccion;
-        if (dentroRango(naveC.getX(),nuevaY)) {
-        	matrix[naveC.getY()][naveC.getX()] = new Vacia(naveC.getX(), naveC.getY());
-        	naveC.moverNaveV(nuevaY);
-        	matrix[naveC.getY()][naveC.getX()] = naveC;
-        	actualizarTablero();
-        	
+        if (dentroRango(naveC.getX(), nuevaY)) {
+            matrix[naveC.getY()][naveC.getX()] = new Vacia(naveC.getX(), naveC.getY());
+            naveC.moverNaveV(nuevaY);
+            matrix[naveC.getY()][naveC.getX()] = naveC;
+            actualizarTablero();
+
         }
-        
+
     }
-    
+
     private boolean dentroRango(int x, int y) {
-    	boolean dentro = false;
-    	if (x>=0 && x<width && y>=0 && y<height) {
-    		dentro = true;
-    	}
-    	return dentro;
+        boolean dentro = false;
+        if (x >= 0 && x < width && y >= 0 && y < height) {
+            dentro = true;
+        }
+        return dentro;
+    }
+
+    public void disparar() {
+        if (naveC != null) {
+            naveC.disparar();
+        }
+    }
+
+    public void actualizarPosicionDisparo(int oldX, int oldY, Disparo d) {
+        if (matrix[oldY][oldX] instanceof Disparo) {
+            matrix[oldY][oldX] = new Vacia(oldX, oldY);
+        }
+        if (d.getY() >= 0 && d.getY() < height) {
+            matrix[d.getY()][d.getX()] = d;
+        }
+        actualizarTablero();
+    }
+
+    public void eliminarDisparo(int x, int y) {
+        if (y >= 0 && y < height && x >= 0 && x < width) {
+            if (matrix[y][x] instanceof Disparo) {
+                matrix[y][x] = new Vacia(x, y);
+            }
+        }
+        actualizarTablero();
     }
 }
