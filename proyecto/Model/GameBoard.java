@@ -7,9 +7,9 @@ public class GameBoard extends Observable {
     private final int width = 100;
     private final int height = 60;
     private Casilla[][] matrix;
-    private int posXInicio = 55;
-    private int posYInicio = 50;
-    private Casilla naveC;
+    private int posXInicio = 50;
+    private int posYInicio = 55;
+    private Nave naveC;
 
 
     private GameBoard() {
@@ -60,8 +60,7 @@ public class GameBoard extends Observable {
             	Casilla c = new Casilla (j,i);
             	matrix[i][j] = c;
             	if (i == posYInicio && j == posXInicio) {
-            		Nave nave = new Nave(j, i); // Crea el pixel central de la nave
-            		naveC = new Casilla(j,i); // Crea un objeto que guarde las coordenadas de la nave
+            		naveC = new Nave(j,i); // Crea un objeto que guarde las coordenadas de la nave
             	}
                 Enemigo e = EnemigoManager.getEnemigoManager().getEnemigoEn(j, i);
                 if (e != null) {
@@ -87,19 +86,31 @@ public class GameBoard extends Observable {
         int nuevaX = naveC.getX() + direccion;
 
         
-        if (nuevaX >= 0 && nuevaX < width) {
-            naveC = new Casilla(nuevaX, naveC.getY());
+        if (dentroRango(nuevaX,naveC.getY())) {
+        	matrix[naveC.getY()][naveC.getX()] = new Vacia(naveC.getX(), naveC.getY());
+        	naveC.moverNave(nuevaX);
+        	matrix[naveC.getY()][naveC.getX()] = naveC;
             actualizarTablero();
         }
     }
     public void moverNaveV(int direccion) {
 
         int nuevaY = naveC.getY() + direccion;
-
-        // límites del tablero
-        if (nuevaY >= 0 && nuevaY < height) {
-            naveC = new Casilla(naveC.getX(), nuevaY);
-            actualizarTablero();
+        if (dentroRango(naveC.getX(),nuevaY)) {
+        	matrix[naveC.getY()][naveC.getX()] = new Vacia(naveC.getX(), naveC.getY());
+        	naveC.moverNaveV(nuevaY);
+        	matrix[naveC.getY()][naveC.getX()] = naveC;
+        	actualizarTablero();
+        	
         }
+        
+    }
+    
+    private boolean dentroRango(int x, int y) {
+    	boolean dentro = false;
+    	if (x>=0 && x<width && y>=0 && y<height) {
+    		dentro = true;
+    	}
+    	return dentro;
     }
 }

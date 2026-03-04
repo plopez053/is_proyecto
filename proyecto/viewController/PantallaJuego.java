@@ -134,8 +134,9 @@ public class PantallaJuego extends JFrame implements Observer, KeyListener {
 			SwingUtilities.invokeLater(() -> {
 				for (int i = 0; i < board.getHeight(); i++) {
 					for (int j = 0; j < board.getWidth(); j++) {
-						Model.Casilla c = board.getCasilla(j, i);
-						boolean esEnemigo = (c instanceof Model.Enemigo);
+					Model.Casilla c = board.getCasilla(j, i);
+					boolean esEnemigo = (c instanceof Model.Enemigo);
+					System.out.println(posN[1]);
 						boolean esNave = (i == posN[0] && j == posN[1]);
 						if(esNave) {
 							labels[i][j].setOpaque(true);
