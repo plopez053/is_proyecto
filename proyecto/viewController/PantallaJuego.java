@@ -6,6 +6,8 @@ import java.awt.EventQueue;
 import java.awt.Graphics;
 import java.awt.GridLayout;
 import java.awt.Image;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.net.URL;
@@ -21,7 +23,8 @@ import javax.swing.SwingUtilities;
 
 import Model.GameBoard;
 
-public class PantallaJuego extends JFrame implements Observer, KeyListener {
+
+public class PantallaJuego extends JFrame implements Observer {
 
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
@@ -30,6 +33,7 @@ public class PantallaJuego extends JFrame implements Observer, KeyListener {
 	private JLabel[][] labels;
 	private int height = GameBoard.getGameBoard().getHeight();
 	private int width = GameBoard.getGameBoard().getWidth();
+	private Controlador2 controlador2;
 	
 
 	/**
@@ -51,7 +55,7 @@ public class PantallaJuego extends JFrame implements Observer, KeyListener {
 	 * Create the frame.
 	 */
 	public PantallaJuego(int x, int y) {
-		addKeyListener(this);
+		addKeyListener(getControlador2());
 		setFocusable(true);
 		setFocusTraversalKeysEnabled(false);
 		requestFocusInWindow();
@@ -95,28 +99,52 @@ public class PantallaJuego extends JFrame implements Observer, KeyListener {
 		labelN.setBorder(BorderFactory.createLineBorder(Color.gray));
 
 	}
-	
-	public void keyPressed(KeyEvent e) {
-
-	    GameBoard board = GameBoard.getGameBoard();
-
-	    int key = e.getKeyCode();
-
-	    if (key == KeyEvent.VK_LEFT) {
-	        board.moverNave(-1);
-	    }
-
-	    if (key == KeyEvent.VK_RIGHT) {
-	        board.moverNave(1);
-	    }
-	    
-	    if(key == KeyEvent.VK_UP) {
-	    	board.moverNaveV(-1);
-	    }
-	    if(key == KeyEvent.VK_DOWN) {
-	    	board.moverNaveV(1);
-	    }
+	private Controlador2 getControlador2() {
+		if (controlador2 == null) {
+			controlador2= new Controlador2();
+		}
+		return controlador2;
 	}
+
+	private class Controlador2 implements KeyListener {
+		// Tras pulsar el botón, abrir la otra pantalla
+		@Override
+		public void keyPressed(KeyEvent e) {
+
+		    GameBoard board = GameBoard.getGameBoard();
+
+		    int key = e.getKeyCode();
+
+		    if (key == KeyEvent.VK_LEFT) {
+		        board.moverNave(-1);
+		    }
+
+		    if (key == KeyEvent.VK_RIGHT) {
+		        board.moverNave(1);
+		    }
+		    
+		    if(key == KeyEvent.VK_UP) {
+		    	board.moverNaveV(-1);
+		    }
+		    if(key == KeyEvent.VK_DOWN) {
+		    	board.moverNaveV(1);
+		    }
+	}
+
+		@Override
+		public void keyTyped(KeyEvent e) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void keyReleased(KeyEvent e) {
+			// TODO Auto-generated method stub
+			
+		}
+	
+	}
+	
 	public void keyReleased(KeyEvent e) {
 		//metodo que no hace absolutamente nada y que lo meto pq sino no furrula
 	}
@@ -136,7 +164,6 @@ public class PantallaJuego extends JFrame implements Observer, KeyListener {
 					for (int j = 0; j < board.getWidth(); j++) {
 					Model.Casilla c = board.getCasilla(j, i);
 					boolean esEnemigo = (c instanceof Model.Enemigo);
-					System.out.println(posN[1]);
 						boolean esNave = (i == posN[0] && j == posN[1]);
 						if(esNave) {
 							labels[i][j].setOpaque(true);
