@@ -94,16 +94,12 @@ public class PantallaPrincipal extends JFrame implements Observer {
 
 	@Override
 	public void update(Observable o, Object arg) {
-		if (o == GameBoard.getGameBoard() && arg instanceof int[]) {
-			int[] listo = (int[]) arg;
-			if (listo[0] == 1) {
-				// Cuando el modelo está listo, creamos la pantalla de juego y cerramos la
-				// principal
-
-				int y = listo[1]; // coordenada y=50
-				int x = listo[2]; // coordenada x=55
-				PantallaJuego juego = new PantallaJuego(x, y);
+		if (o == GameBoard.getGameBoard() && arg instanceof Object[]) {
+			Object[] data = (Object[]) arg;
+			if (data.length > 0 && data[0] instanceof Integer && (int) data[0] == 1) {
+				PantallaJuego juego = new PantallaJuego();
 				juego.setVisible(true);
+				juego.update(o, data[1]);
 				contentPane.setVisible(false);
 			}
 		}

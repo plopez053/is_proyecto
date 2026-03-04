@@ -30,29 +30,14 @@ public class PantallaJuego extends JFrame implements Observer {
 	private JPanel panel;
 	private Image backgroundImage;
 	private JLabel[][] labels;
-	private int height = GameBoard.getGameBoard().getHeight();
-	private int width = GameBoard.getGameBoard().getWidth();
 	private Controlador2 controlador2;
-
-	/**
-	 * Launch the application.
-	 */
-	public static void main(String[] args) {
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
-	}
+	private int boardHeight = 60;
+	private int boardWidth = 100;
 
 	/**
 	 * Create the frame.
 	 */
-	public PantallaJuego(int x, int y) {
+	public PantallaJuego() {
 		addKeyListener(getControlador2());
 		setFocusable(true);
 		setFocusTraversalKeysEnabled(false);
@@ -79,23 +64,19 @@ public class PantallaJuego extends JFrame implements Observer {
 		};
 		contentPane.setLayout(new BorderLayout());
 		setContentPane(contentPane);
-		panel = new JPanel(new GridLayout(60, 100, 0, 0));
+		panel = new JPanel(new GridLayout(boardHeight, boardWidth, 0, 0));
 		panel.setOpaque(false);
 		contentPane.add(panel, BorderLayout.CENTER);
-		labels = new JLabel[height][width];
-		for (int i = 0; i < height; i++) {
-			for (int j = 0; j < width; j++) {
+
+		labels = new JLabel[boardHeight][boardWidth];
+		for (int i = 0; i < boardHeight; i++) {
+			for (int j = 0; j < boardWidth; j++) {
 				JLabel label = new JLabel();
 				label.setOpaque(false);
 				panel.add(label);
 				labels[i][j] = label;
 			}
 		}
-		JLabel labelN = labels[y][x];
-		labelN.setOpaque(true);
-		labelN.setBackground(Color.red);
-		labelN.setBorder(BorderFactory.createLineBorder(Color.gray));
-
 	}
 
 	private Controlador2 getControlador2() {
@@ -159,28 +140,27 @@ public class PantallaJuego extends JFrame implements Observer {
 
 	@Override
 	public void update(Observable o, Object arg) {
-		if (o instanceof GameBoard && labels != null) {
-			int[] posN = (int[]) arg;
-			GameBoard board = (GameBoard) o;
+		if (o instanceof GameBoard && arg instanceof int[][] && labels != null) {
+			int[][] snapshot = (int[][]) arg;
 			SwingUtilities.invokeLater(() -> {
-				for (int i = 0; i < board.getHeight(); i++) {
-					for (int j = 0; j < board.getWidth(); j++) {
-						Model.Casilla c = board.getCasilla(j, i);
-						boolean esEnemigo = (c instanceof Model.Enemigo);
-						boolean esNave = (i == posN[0] && j == posN[1]);
-						if (esNave) {
+				int boardHeight = snapshot.length;
+				int boardWidth = snapshot[0].length;
+				for (int i = 0; i < boardHeight; i++) {
+					for (int j = 0; j < boardWidth; j++) {
+						int tipo = snapshot[i][j];
+						if (tipo == 1) { // Nave
 							labels[i][j].setOpaque(true);
 							labels[i][j].setBackground(Color.red);
 							labels[i][j].setBorder(BorderFactory.createLineBorder(Color.gray));
-						} else if (esEnemigo) {
+						} else if (tipo == 0) { // Enemigo
 							labels[i][j].setOpaque(true);
 							labels[i][j].setBackground(Color.GREEN);
 							labels[i][j].setBorder(BorderFactory.createLineBorder(Color.gray));
-						} else if (c instanceof Model.Disparo) {
+						} else if (tipo == 2) { // Disparo
 							labels[i][j].setOpaque(true);
 							labels[i][j].setBackground(Color.YELLOW);
 							labels[i][j].setBorder(BorderFactory.createLineBorder(Color.gray));
-						} else {
+						} else { // Vacia
 							labels[i][j].setOpaque(false);
 							labels[i][j].setBorder(null);
 

@@ -56,10 +56,8 @@ public class GameBoard extends Observable {
         EnemigoManager.getEnemigoManager().spawnEnemies();
         for (int i = 0; i < height; i++) {
             for (int j = 0; j < width; j++) {
-                Casilla c = new Casilla(j, i);
-                matrix[i][j] = c;
                 if (i == posYInicio && j == posXInicio) {
-                    naveC = new Nave(j, i); // Crea un objeto que guarde las coordenadas de la nave
+                    naveC = new Nave(j, i);
                 }
                 Enemigo e = EnemigoManager.getEnemigoManager().getEnemigoEn(j, i);
                 if (e != null) {
@@ -71,13 +69,33 @@ public class GameBoard extends Observable {
         }
         EnemigoManager.getEnemigoManager().iniciarTimer();
         setChanged();
-        // Se crea el tablero inicializando la nave y creando los enemigos
-        notifyObservers(new int[] { 1, naveC.getY(), naveC.getX() });
+        // Avisamos con un código especial (1) para abrir la pantalla, y pasamos el
+        // primer snapshot
+        notifyObservers(new Object[] { 1, getBoardActual() });
     }
 
     public void actualizarTablero() {
         setChanged();
-        notifyObservers(new int[] { naveC.getY(), naveC.getX() });
+        notifyObservers(getBoardActual());
+    }
+
+    private int[][] getBoardActual() {
+        int[][] snapshot = new int[height][width];
+        for (int i = 0; i < height; i++) {
+            for (int j = 0; j < width; j++) {
+                Casilla c = matrix[i][j];
+                if (c instanceof Enemigo) {
+                    snapshot[i][j] = 0;
+                } else if (c instanceof Nave) {
+                    snapshot[i][j] = 1;
+                } else if (c instanceof Disparo) {
+                    snapshot[i][j] = 2;
+                } else {
+                    snapshot[i][j] = 3;
+                }
+            }
+        }
+        return snapshot;
     }
 
     public void moverNave(int direccion) {
