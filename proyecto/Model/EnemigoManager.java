@@ -10,7 +10,6 @@ public class EnemigoManager {
     private static EnemigoManager miEnemigoManager;
     private List<Enemigo> enemigos;
     private Random random;
-    private Timer timer;
 
     private EnemigoManager() {
         enemigos = new ArrayList<>();
@@ -22,25 +21,6 @@ public class EnemigoManager {
             miEnemigoManager = new EnemigoManager();
         }
         return miEnemigoManager;
-    }
-
-    public void iniciarTimer() {
-        detenerTimer();
-        TimerTask task = new TimerTask() {
-            @Override
-            public void run() {
-                moveEnemies();
-            }
-        };
-        timer = new Timer();
-        timer.schedule(task, 1000, 200);
-    }
-
-    public void detenerTimer() {
-        if (timer != null) {
-            timer.cancel();
-            timer = null;
-        }
     }
 
     public void spawnEnemies() {
@@ -80,23 +60,10 @@ public class EnemigoManager {
     }
 
     public void moveEnemies() {
-        GameBoard board = GameBoard.getGameBoard();
         for (Enemigo e : enemigos) {
-            board.setCasilla(e.getX(), e.getY(), new Vacia(e.getX(), e.getY()));
+        	int nuevaY = e.getY() + 1;
+        	e.setY(nuevaY);
         }
-
-        for (Enemigo e : enemigos) {
-            int nextY = e.getY() + 1;
-            if (nextY >= board.getHeight()) {
-                // detener timer cuando llegan al final
-                detenerTimer();
-            } else {
-                e.setY(nextY);
-                board.setCasilla(e.getX(), e.getY(), e);
-            }
-        }
-
-        board.actualizarTablero();
     }
 
     public List<Enemigo> getEnemigos() {

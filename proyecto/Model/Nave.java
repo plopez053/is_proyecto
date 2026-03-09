@@ -1,6 +1,8 @@
 package Model;
 
 public class Nave extends Casilla {
+	private boolean viva = true;
+	
     public Nave(int x, int y) {
         super(x, y);
     }
@@ -19,5 +21,13 @@ public class Nave extends Casilla {
         if (shotY >= 0) {
             new Disparo(shotX, shotY);
         }
+    }
+    
+    public void removeNave() {
+    	viva = false;
+    }
+    
+    public boolean estaViva() {
+    	return viva;
     }
 }

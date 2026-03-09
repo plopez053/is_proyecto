@@ -10,6 +10,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.net.URL;
 import java.util.Observable;
 import java.util.Observer;
@@ -18,6 +20,7 @@ import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
@@ -39,6 +42,7 @@ public class PantallaJuego extends JFrame implements Observer {
 	 */
 	public PantallaJuego() {
 		addKeyListener(getControlador2());
+		addWindowListener(getControlador2());
 		setFocusable(true);
 		setFocusTraversalKeysEnabled(false);
 		requestFocusInWindow();
@@ -86,7 +90,7 @@ public class PantallaJuego extends JFrame implements Observer {
 		return controlador2;
 	}
 
-	private class Controlador2 implements KeyListener {
+	private class Controlador2 implements KeyListener, WindowListener {
 		// Tras pulsar el botón, abrir la otra pantalla
 		@Override
 		public void keyPressed(KeyEvent e) {
@@ -127,6 +131,47 @@ public class PantallaJuego extends JFrame implements Observer {
 
 		}
 
+		@Override
+		public void windowOpened(WindowEvent e) {
+			GameBoard.getGameBoard().actualizarTablero();
+		}
+
+		@Override
+		public void windowClosing(WindowEvent e) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void windowClosed(WindowEvent e) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void windowIconified(WindowEvent e) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void windowDeiconified(WindowEvent e) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void windowActivated(WindowEvent e) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void windowDeactivated(WindowEvent e) {
+			// TODO Auto-generated method stub
+			
+		}
+
 	}
 
 	public void keyReleased(KeyEvent e) {
@@ -140,8 +185,10 @@ public class PantallaJuego extends JFrame implements Observer {
 
 	@Override
 	public void update(Observable o, Object arg) {
-		if (o instanceof GameBoard && arg instanceof int[][] && labels != null) {
-			int[][] snapshot = (int[][]) arg;
+		if (o instanceof GameBoard && arg instanceof Object[] && labels != null) {
+			Object[] total = (Object[])arg;
+			int fin = (int)total[0];
+			int[][] snapshot = (int[][]) total[1];
 			SwingUtilities.invokeLater(() -> {
 				int boardHeight = snapshot.length;
 				int boardWidth = snapshot[0].length;
@@ -168,6 +215,9 @@ public class PantallaJuego extends JFrame implements Observer {
 					}
 				}
 				panel.repaint();
+				if (fin == 2) {
+					JOptionPane.showMessageDialog(contentPane, "GAME OVER", "TRY IT AGAIN", JOptionPane.INFORMATION_MESSAGE);
+				}
 			});
 		}
 	}
