@@ -36,6 +36,7 @@ public class PantallaJuego extends JFrame implements Observer {
 	private Controlador2 controlador2;
 	private int boardHeight = 60;
 	private int boardWidth = 100;
+	private boolean juegoTerminado = false; //Igual es buena práctica tener un booleano que si se ha acabado la partida no permita ejecutar movimientos.
 
 	/**
 	 * Create the frame.
@@ -217,6 +218,7 @@ public class PantallaJuego extends JFrame implements Observer {
 				panel.repaint();
 				if (fin == 2) {
 					JOptionPane.showMessageDialog(contentPane, "GAME OVER", "TRY IT AGAIN", JOptionPane.INFORMATION_MESSAGE);
+					System.exit(0);
 				}
 			});
 		}
