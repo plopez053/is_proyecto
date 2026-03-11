@@ -14,7 +14,6 @@ public class GameBoard extends Observable {
     private int posYInicio = 55;
     private Nave naveC;
     private Timer timer;
- 
 
     private GameBoard() {
         matrix = new Casilla[height][width];
@@ -64,14 +63,14 @@ public class GameBoard extends Observable {
                 if (i == posYInicio && j == posXInicio) {
                     naveC = new Nave(j, i);
                     matrix[i][j] = naveC;
-                }else {
-                	Enemigo e = EnemigoManager.getEnemigoManager().getEnemigoEn(j, i);
+                } else {
+                    Enemigo e = EnemigoManager.getEnemigoManager().getEnemigoEn(j, i);
                     if (e != null) {
                         matrix[i][j] = e;
                     } else {
                         matrix[i][j] = new Vacia(j, i);
                     }
-                
+
                 }
             }
         }
@@ -79,12 +78,12 @@ public class GameBoard extends Observable {
         setChanged();
         // Avisamos con un código especial (1) para abrir la pantalla, y pasamos el
         // primer snapshot
-        notifyObservers(new Object[] {1, getBoardActual()});
+        notifyObservers(new Object[] { 1, getBoardActual() });
     }
 
     public void actualizarTablero() {
         setChanged();
-        notifyObservers(new Object[] {0, getBoardActual()});
+        notifyObservers(new Object[] { 0, getBoardActual() });
     }
 
     private int[][] getBoardActual() {
@@ -95,11 +94,11 @@ public class GameBoard extends Observable {
                 if (c instanceof Enemigo) {
                     snapshot[i][j] = 0;
                 } else if (c instanceof Nave) {
-                	if (!((Nave)c).estaViva()) {
-                        snapshot[i][j] = 0; //Si un enemigo ha tocado la nave -> Enemigo. Nave muere.
-                	}else {
-                		snapshot[i][j] = 1; //Si un enemigo no ha tocado la nave -> Nave
-                	}
+                    if (!((Nave) c).estaViva()) {
+                        snapshot[i][j] = 0; // Si un enemigo ha tocado la nave -> Enemigo. Nave muere.
+                    } else {
+                        snapshot[i][j] = 1; // Si un enemigo no ha tocado la nave -> Nave
+                    }
                 } else if (c instanceof Disparo) {
                     snapshot[i][j] = 2;
                 } else {
@@ -111,38 +110,38 @@ public class GameBoard extends Observable {
     }
 
     public void moverNave(int direccion) {
-
         int nuevaX = naveC.getX() + direccion;
 
-        if (dentroRango(nuevaX, naveC.getY()) && !hayEnemigoEnCasilla(nuevaX, naveC.getY())) {
-            matrix[naveC.getY()][naveC.getX()] = new Vacia(naveC.getX(), naveC.getY());
-            naveC.moverNave(nuevaX);
-            matrix[naveC.getY()][naveC.getX()] = naveC;
-            actualizarTablero();
-        }else if (hayEnemigoEnCasilla(nuevaX, naveC.getY())) {
-        	matrix[naveC.getY()][naveC.getX()] = new Vacia(naveC.getX(), naveC.getY());
-        	detenerTimer();
-        	setChanged();
-    		notifyObservers(new Object[] {2, getBoardActual()});
-
+        if (dentroRango(nuevaX, naveC.getY())) {
+            if (hayEnemigoEnCasilla(nuevaX, naveC.getY())) {
+                matrix[naveC.getY()][naveC.getX()] = new Vacia(naveC.getX(), naveC.getY());
+                detenerTimer();
+                setChanged();
+                notifyObservers(new Object[] { 2, getBoardActual() });
+            } else {
+                matrix[naveC.getY()][naveC.getX()] = new Vacia(naveC.getX(), naveC.getY());
+                naveC.moverNave(nuevaX);
+                matrix[naveC.getY()][naveC.getX()] = naveC;
+                actualizarTablero();
+            }
         }
-    
     }
 
     public void moverNaveV(int direccion) {
-
         int nuevaY = naveC.getY() + direccion;
-        if (dentroRango(naveC.getX(), nuevaY) && !hayEnemigoEnCasilla(naveC.getX(), nuevaY)) {
-            matrix[naveC.getY()][naveC.getX()] = new Vacia(naveC.getX(), naveC.getY());
-            naveC.moverNaveV(nuevaY);
-            matrix[naveC.getY()][naveC.getX()] = naveC;
-            actualizarTablero();
 
-        }else if (hayEnemigoEnCasilla(naveC.getX(), nuevaY)) {
-        	matrix[naveC.getY()][naveC.getX()] = new Vacia(naveC.getX(), naveC.getY());
-        	detenerTimer();
-        	setChanged();
-      		notifyObservers(new Object[] {2, getBoardActual()});
+        if (dentroRango(naveC.getX(), nuevaY)) {
+            if (hayEnemigoEnCasilla(naveC.getX(), nuevaY)) {
+                matrix[naveC.getY()][naveC.getX()] = new Vacia(naveC.getX(), naveC.getY());
+                detenerTimer();
+                setChanged();
+                notifyObservers(new Object[] { 2, getBoardActual() });
+            } else {
+                matrix[naveC.getY()][naveC.getX()] = new Vacia(naveC.getX(), naveC.getY());
+                naveC.moverNaveV(nuevaY);
+                matrix[naveC.getY()][naveC.getX()] = naveC;
+                actualizarTablero();
+            }
         }
     }
 
@@ -178,7 +177,7 @@ public class GameBoard extends Observable {
         }
         actualizarTablero();
     }
-    
+
     public void iniciarTimer() {
         detenerTimer();
         TimerTask task = new TimerTask() {
@@ -199,50 +198,47 @@ public class GameBoard extends Observable {
     }
 
     private void moverEnemigos() {
-    	boolean fin = false;
-    	for (int i=0;i<height;i++) {
-    		for (int j =0; j<width;j++) {
-    			Casilla c = matrix[i][j];
-    			if (c instanceof Enemigo) {
-    				matrix[i][j] = new Vacia(j,i);
-    			}
-    		}
-    	}
-    	
-    	EnemigoManager.getEnemigoManager().moveEnemies();
-    	for (Enemigo e: EnemigoManager.getEnemigoManager().getEnemigos()) {
-    		if (enemigoFueraRango(e)){
-    			fin=true;
-    		}else if (partidaPerdida(e)) {
-    			fin = true;
-        		//matrix[naveC.getY()][naveC.getX()] = new Vacia(naveC.getX(), naveC.getY());
-        		naveC.removeNave();
-         	}else {
-        		matrix[e.getY()][e.getX()] = e;
-        	}
-    	}
-    	if (fin) {
-    		detenerTimer();
-    		setChanged();
-    		notifyObservers(new Object[] {2, getBoardActual()});
-    	}else {
-    		actualizarTablero();
-    	}
+        boolean fin = false;
+        for (int i = 0; i < height; i++) {
+            for (int j = 0; j < width; j++) {
+                Casilla c = matrix[i][j];
+                if (c instanceof Enemigo) {
+                    matrix[i][j] = new Vacia(j, i);
+                }
+            }
+        }
+
+        EnemigoManager.getEnemigoManager().moveEnemies();
+        for (Enemigo e : EnemigoManager.getEnemigoManager().getEnemigos()) {
+            if (enemigoFueraRango(e)) {
+                fin = true;
+            } else if (partidaPerdida(e)) {
+                fin = true;
+                // matrix[naveC.getY()][naveC.getX()] = new Vacia(naveC.getX(), naveC.getY());
+                naveC.removeNave();
+            } else {
+                matrix[e.getY()][e.getX()] = e;
+            }
+        }
+        if (fin) {
+            detenerTimer();
+            setChanged();
+            notifyObservers(new Object[] { 2, getBoardActual() });
+        } else {
+            actualizarTablero();
+        }
     }
-    
+
     private boolean partidaPerdida(Enemigo e) {
-    	return e.getX() == naveC.getX() && e.getY() == naveC.getY();
+        return e.getX() == naveC.getX() && e.getY() == naveC.getY();
     }
-    	
+
     private boolean enemigoFueraRango(Enemigo e) {
-    	return e.getY()>=height;
+        return e.getY() >= height;
     }
-    
+
     private boolean hayEnemigoEnCasilla(int x, int y) {
-    	return matrix[y][x] instanceof Enemigo;
+        return matrix[y][x] instanceof Enemigo;
     }
-    
-    private boolean hayNaveEnCasilla(int x, int y ) {
-    	return matrix[y][x] instanceof Enemigo;
-    }
+
 }

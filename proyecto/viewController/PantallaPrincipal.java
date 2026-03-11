@@ -27,7 +27,7 @@ public class PantallaPrincipal extends JFrame implements Observer {
 	private Image backgroundImage;
 	private Image logoSI;
 	private Controlador controlador;
-	
+
 	public PantallaPrincipal() {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 450, 300);
@@ -80,7 +80,7 @@ public class PantallaPrincipal extends JFrame implements Observer {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			GameBoard.getGameBoard().crearTablero();
-			
+
 		}
 	}
 
@@ -95,15 +95,14 @@ public class PantallaPrincipal extends JFrame implements Observer {
 
 	@Override
 	public void update(Observable o, Object arg) {
-		if (o == GameBoard.getGameBoard() && arg instanceof Object[]) {
+		if (arg instanceof Object[]) {
 			Object[] data = (Object[]) arg;
 			if (data.length > 0 && data[0] instanceof Integer && (int) data[0] == 1) {
-					PantallaJuego juego = new PantallaJuego();
-					juego.setVisible(true);
-					setVisible(false);
-				}
-				
+				PantallaJuego juego = new PantallaJuego();
+				juego.setVisible(true);
+				setVisible(false);
 			}
+
 		}
 	}
-
+}

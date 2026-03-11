@@ -36,7 +36,8 @@ public class PantallaJuego extends JFrame implements Observer {
 	private Controlador2 controlador2;
 	private int boardHeight = 60;
 	private int boardWidth = 100;
-	private boolean juegoTerminado = false; //Igual es buena práctica tener un booleano que si se ha acabado la partida no permita ejecutar movimientos.
+	private boolean juegoTerminado = false; // Igual es buena práctica tener un booleano que si se ha acabado la partida
+											// no permita ejecutar movimientos.
 
 	/**
 	 * Create the frame.
@@ -141,55 +142,46 @@ public class PantallaJuego extends JFrame implements Observer {
 		@Override
 		public void windowClosing(WindowEvent e) {
 			// TODO Auto-generated method stub
-			
+
 		}
 
 		@Override
 		public void windowClosed(WindowEvent e) {
 			// TODO Auto-generated method stub
-			
+
 		}
 
 		@Override
 		public void windowIconified(WindowEvent e) {
 			// TODO Auto-generated method stub
-			
+
 		}
 
 		@Override
 		public void windowDeiconified(WindowEvent e) {
 			// TODO Auto-generated method stub
-			
+
 		}
 
 		@Override
 		public void windowActivated(WindowEvent e) {
 			// TODO Auto-generated method stub
-			
+
 		}
 
 		@Override
 		public void windowDeactivated(WindowEvent e) {
 			// TODO Auto-generated method stub
-			
+
 		}
-
-	}
-
-	public void keyReleased(KeyEvent e) {
-		// metodo que no hace absolutamente nada y que lo meto pq sino no furrula
-	}
-
-	public void keyTyped(KeyEvent e) {
-		// mas de lo mismo
 
 	}
 
 	@Override
 	public void update(Observable o, Object arg) {
-		if (o instanceof GameBoard && arg instanceof Object[] && labels != null) {
-			Object[] total = (Object[])arg;
-			int fin = (int)total[0];
+		if (arg instanceof Object[] && labels != null) {
+			Object[] total = (Object[]) arg;
+			int fin = (int) total[0];
 			int[][] snapshot = (int[][]) total[1];
 			SwingUtilities.invokeLater(() -> {
 				int boardHeight = snapshot.length;
@@ -218,9 +210,11 @@ public class PantallaJuego extends JFrame implements Observer {
 				}
 				panel.repaint();
 				if (fin == 2) {
-					JOptionPane.showMessageDialog(contentPane, "GAME OVER", "TRY IT AGAIN", JOptionPane.INFORMATION_MESSAGE);
+					JOptionPane.showMessageDialog(contentPane, "GAME OVER", "TRY IT AGAIN",
+							JOptionPane.INFORMATION_MESSAGE);
 					juegoTerminado = true;
-					System.exit(0); //Se cierra la pantalla. Pero igual es mejor forma hacer que al pulsar OK, vuelva a la pantalla ppal para reiniciar juego.
+					System.exit(0); // Se cierra la pantalla. Pero igual es mejor forma hacer que al pulsar OK,
+									// vuelva a la pantalla ppal para reiniciar juego.
 				}
 			});
 		}
