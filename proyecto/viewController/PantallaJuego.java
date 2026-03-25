@@ -97,27 +97,25 @@ public class PantallaJuego extends JFrame implements Observer {
 		@Override
 		public void keyPressed(KeyEvent e) {
 
-			GameBoard board = GameBoard.getGameBoard();
-
 			int key = e.getKeyCode();
 			if (!juegoTerminado) {
 				if (key == KeyEvent.VK_LEFT) {
-					board.moverNave(-1);
+					GameBoard.getGameBoard().moverNave(-1);
 				}
 
 				if (key == KeyEvent.VK_RIGHT) {
-					board.moverNave(1);
+					GameBoard.getGameBoard().moverNave(1);
 				}
 
 				if (key == KeyEvent.VK_UP) {
-					board.moverNaveV(-1);
+					GameBoard.getGameBoard().moverNaveV(-1);
 				}
 				if (key == KeyEvent.VK_DOWN) {
-					board.moverNaveV(1);
+					GameBoard.getGameBoard().moverNaveV(1);
 				}
 
 				if (key == KeyEvent.VK_SPACE) {
-					board.disparar();
+					GameBoard.getGameBoard().disparar();
 				}
 			}
 		}
@@ -208,7 +206,6 @@ public class PantallaJuego extends JFrame implements Observer {
 						}
 					}
 				}
-				panel.repaint();
 				if (fin == 2) {
 					JOptionPane.showMessageDialog(contentPane, "GAME OVER", "TRY IT AGAIN",
 							JOptionPane.INFORMATION_MESSAGE);
