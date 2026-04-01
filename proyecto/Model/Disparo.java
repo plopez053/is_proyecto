@@ -1,27 +1,11 @@
 package Model;
 
-import java.util.Timer;
-import java.util.TimerTask;
-
 public class Disparo extends Casilla {
-    private Timer timer;
-
     public Disparo(int x, int y) {
         super(x, y);
-        iniciarMovimiento();
     }
 
-    private void iniciarMovimiento() {
-        timer = new Timer();
-        timer.scheduleAtFixedRate(new TimerTask() {
-            @Override
-            public void run() {
-                mover();
-            }
-        }, 0, 50);
-    }
-
-    private void mover() {
+    public void mover() {
         GameBoard gb = GameBoard.getGameBoard();
         int oldX = getX();
         int oldY = getY();
@@ -46,9 +30,7 @@ public class Disparo extends Casilla {
     }
 
     private void detenerYBorrar(int x, int y) {
-        if (timer != null) {
-            timer.cancel();
-        }
+        DisparoManager.getDisparoManager().eliminarDisparo(this);
         GameBoard.getGameBoard().eliminarDisparo(x, y);
     }
 }

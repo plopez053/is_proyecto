@@ -11,16 +11,41 @@ public class EnemigoManager {
     private List<Enemigo> enemigos;
     private Random random;
 
+    private Timer timer;
+
     private EnemigoManager() {
         enemigos = new ArrayList<>();
         random = new Random();
     }
 
-    public static EnemigoManager getEnemigoManager() {
+    public static synchronized EnemigoManager getEnemigoManager() {
         if (miEnemigoManager == null) {
             miEnemigoManager = new EnemigoManager();
         }
         return miEnemigoManager;
+    }
+
+    public void iniciarTimer() {
+        detenerTimer();
+        timer = new Timer();
+        timer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                moverEnemigos();
+            }
+        }, 1000, 200);
+    }
+
+    public void detenerTimer() {
+        if (timer != null) {
+            timer.cancel();
+            timer = null;
+        }
+    }
+
+    private void moverEnemigos() {
+        GameBoard gb = GameBoard.getGameBoard();
+        gb.moverEnemigos();
     }
 
     public void spawnEnemies() {
@@ -61,8 +86,8 @@ public class EnemigoManager {
 
     public void moveEnemies() {
         for (Enemigo e : enemigos) {
-        	int nuevaY = e.getY() + 1;
-        	e.setY(nuevaY);
+            int nuevaY = e.getY() + 1;
+            e.setY(nuevaY);
         }
     }
 

@@ -2,8 +2,6 @@ package Model;
 
 import java.util.List;
 import java.util.Observable;
-import java.util.Timer;
-import java.util.TimerTask;
 
 public class GameBoard extends Observable {
     private static GameBoard miGameBoard;
@@ -13,7 +11,6 @@ public class GameBoard extends Observable {
     private int posXInicio = 50;
     private int posYInicio = 55;
     private Nave naveC;
-    private Timer timer;
 
     private GameBoard() {
         matrix = new Casilla[height][width];
@@ -74,7 +71,8 @@ public class GameBoard extends Observable {
                 }
             }
         }
-        iniciarTimer();
+        EnemigoManager.getEnemigoManager().iniciarTimer();
+
         setChanged();
         // Avisamos con un código especial (1) para abrir la pantalla, y pasamos el
         // primer snapshot
@@ -109,48 +107,29 @@ public class GameBoard extends Observable {
         return snapshot;
     }
 
-    public void moverNave(int direccion) {
-        int nuevaX = naveC.getX() + direccion;
-
-        if (dentroRango(nuevaX, naveC.getY())) {
-            if (hayEnemigoEnCasilla(nuevaX, naveC.getY())) {
-                matrix[naveC.getY()][naveC.getX()] = new Vacia(naveC.getX(), naveC.getY());
-                detenerTimer();
-                setChanged();
-                notifyObservers(new Object[] { 2, getBoardActual() });
-            } else {
-                matrix[naveC.getY()][naveC.getX()] = new Vacia(naveC.getX(), naveC.getY());
-                naveC.moverNave(nuevaX);
-                matrix[naveC.getY()][naveC.getX()] = naveC;
-                actualizarTablero();
-            }
-        }
+    public void actualizarPosicion(int viejaX, int viejaY, Casilla c) {
+        matrix[viejaY][viejaX] = new Vacia(viejaX, viejaY);
+        matrix[c.getY()][c.getX()] = c;
+        actualizarTablero();
     }
 
-    public void moverNaveV(int direccion) {
-        int nuevaY = naveC.getY() + direccion;
-
-        if (dentroRango(naveC.getX(), nuevaY)) {
-            if (hayEnemigoEnCasilla(naveC.getX(), nuevaY)) {
-                matrix[naveC.getY()][naveC.getX()] = new Vacia(naveC.getX(), naveC.getY());
-                detenerTimer();
-                setChanged();
-                notifyObservers(new Object[] { 2, getBoardActual() });
-            } else {
-                matrix[naveC.getY()][naveC.getX()] = new Vacia(naveC.getX(), naveC.getY());
-                naveC.moverNaveV(nuevaY);
-                matrix[naveC.getY()][naveC.getX()] = naveC;
-                actualizarTablero();
-            }
-        }
+    public boolean esPosicionValida(int x, int y) {
+        return x >= 0 && x < width && y >= 0 && y < height;
     }
 
-    private boolean dentroRango(int x, int y) {
-        boolean dentro = false;
-        if (x >= 0 && x < width && y >= 0 && y < height) {
-            dentro = true;
-        }
-        return dentro;
+    public boolean hayEnemigo(int x, int y) {
+        return matrix[y][x] instanceof Enemigo;
+    }
+
+    public void finalizarJuego() {
+        EnemigoManager.getEnemigoManager().detenerTimer();
+        DisparoManager.getDisparoManager().detenerTimer();
+        setChanged();
+        notifyObservers(new Object[] { 2, getBoardActual() });
+    }
+
+    public Nave getNave() {
+        return naveC;
     }
 
     public void disparar() {
@@ -178,26 +157,8 @@ public class GameBoard extends Observable {
         actualizarTablero();
     }
 
-    public void iniciarTimer() {
-        detenerTimer();
-        TimerTask task = new TimerTask() {
-            @Override
-            public void run() {
-                moverEnemigos();
-            }
-        };
-        timer = new Timer();
-        timer.schedule(task, 1000, 200);
-    }
+    public void moverEnemigos() {
 
-    public void detenerTimer() {
-        if (timer != null) {
-            timer.cancel();
-            timer = null;
-        }
-    }
-
-    private void moverEnemigos() {
         boolean fin = false;
         for (int i = 0; i < height; i++) {
             for (int j = 0; j < width; j++) {
@@ -221,9 +182,11 @@ public class GameBoard extends Observable {
             }
         }
         if (fin) {
-            detenerTimer();
+            EnemigoManager.getEnemigoManager().detenerTimer();
+            DisparoManager.getDisparoManager().detenerTimer();
             setChanged();
             notifyObservers(new Object[] { 2, getBoardActual() });
+
         } else {
             actualizarTablero();
         }
@@ -235,10 +198,6 @@ public class GameBoard extends Observable {
 
     private boolean enemigoFueraRango(Enemigo e) {
         return e.getY() >= height;
-    }
-
-    private boolean hayEnemigoEnCasilla(int x, int y) {
-        return matrix[y][x] instanceof Enemigo;
     }
 
 }
