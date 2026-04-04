@@ -1,13 +1,19 @@
 package Model;
 
-public class Nave extends Casilla {
+public abstract class Nave  {
     private boolean viva = true;
+    private Composite pixeles;
+    
+    public Nave() {
+       
+    } 
 
-    public Nave(int x, int y) {
-        super(x, y);
+    public void mover() {
+    	pixeles.moverHD();
+    	//Habría que hacer que dependiendo de la tecla pulsada se mueva uno u otro;
+    	//Luego actualizar la casilla con el state.
     }
-
-    public void mover(int dx, int dy) {
+   /*public void mover(int dx, int dy) {
         GameBoard board = GameBoard.getGameBoard();
         int nuevaX = getX() + dx;
         int nuevaY = getY() + dy;
@@ -26,18 +32,20 @@ public class Nave extends Casilla {
                 board.actualizarPosicion(viejaX, viejaY, this);
             }
         }
-    }
+    }*/
 
-    public void disparar() {
+    /*public void disparar() {
         int shotX = getX();
         int shotY = getY() - 2;
         if (shotY >= 0) {
             Disparo nuevoDisparo = new Disparo(shotX, shotY);
             DisparoManager.getDisparoManager().agregarDisparo(nuevoDisparo);
         }
-    }
+    }*/
 
-    public void removeNave() {
+   
+
+	public void removeNave() {
         viva = false;
     }
 

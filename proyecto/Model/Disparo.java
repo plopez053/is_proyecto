@@ -1,11 +1,11 @@
 package Model;
 
-public class Disparo extends Casilla {
-    public Disparo(int x, int y) {
-        super(x, y);
+public class Disparo  {
+	private Composite pixeles;
+    public Disparo() {
     }
 
-    public void mover() {
+   /* public void mover() {
         GameBoard gb = GameBoard.getGameBoard();
         int oldX = getX();
         int oldY = getY();
@@ -32,5 +32,5 @@ public class Disparo extends Casilla {
     private void detenerYBorrar(int x, int y) {
         DisparoManager.getDisparoManager().eliminarDisparo(this);
         GameBoard.getGameBoard().eliminarDisparo(x, y);
-    }
+    }*/
 }

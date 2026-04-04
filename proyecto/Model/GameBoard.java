@@ -7,13 +7,13 @@ public class GameBoard extends Observable {
     private static GameBoard miGameBoard;
     private final int width = 100;
     private final int height = 60;
-    private Casilla[][] matrix;
+    private One[][] matrix;
     private int posXInicio = 50;
     private int posYInicio = 55;
     private Nave naveC;
 
     private GameBoard() {
-        matrix = new Casilla[height][width];
+        matrix = new One[height][width];
         clearBoard();
     }
 
@@ -32,14 +32,14 @@ public class GameBoard extends Observable {
         return height;
     }
 
-    public Casilla getCasilla(int x, int y) {
+    public One getCasilla(int x, int y) {
         if (x >= 0 && x < width && y >= 0 && y < height) {
             return matrix[y][x];
         }
         return null;
     }
 
-    public void setCasilla(int x, int y, Casilla casilla) {
+    public void setCasilla(int x, int y, One casilla) {
         if (x >= 0 && x < width && y >= 0 && y < height) {
             matrix[y][x] = casilla;
         }
@@ -88,7 +88,7 @@ public class GameBoard extends Observable {
         int[][] snapshot = new int[height][width];
         for (int i = 0; i < height; i++) {
             for (int j = 0; j < width; j++) {
-                Casilla c = matrix[i][j];
+                One c = matrix[i][j];
                 if (c instanceof Enemigo) {
                     snapshot[i][j] = 0;
                 } else if (c instanceof Nave) {
@@ -162,7 +162,7 @@ public class GameBoard extends Observable {
         boolean fin = false;
         for (int i = 0; i < height; i++) {
             for (int j = 0; j < width; j++) {
-                Casilla c = matrix[i][j];
+                One c = matrix[i][j];
                 if (c instanceof Enemigo) {
                     matrix[i][j] = new Vacia(j, i);
                 }
