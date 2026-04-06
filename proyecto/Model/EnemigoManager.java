@@ -3,49 +3,22 @@ package Model;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.Timer;
-import java.util.TimerTask;
 
 public class EnemigoManager {
     private static EnemigoManager miEnemigoManager;
-    private List<Enemigo> enemigos;
+    private List<Enemigo> enemigos; // Ahora guarda el Controlador (Enemigo)
     private Random random;
-
-    private Timer timer;
 
     private EnemigoManager() {
         enemigos = new ArrayList<>();
         random = new Random();
     }
 
-    public static synchronized EnemigoManager getEnemigoManager() {
+    public static EnemigoManager getEnemigoManager() {
         if (miEnemigoManager == null) {
             miEnemigoManager = new EnemigoManager();
         }
         return miEnemigoManager;
-    }
-
-    public void iniciarTimer() {
-        detenerTimer();
-        timer = new Timer();
-        timer.scheduleAtFixedRate(new TimerTask() {
-            @Override
-            public void run() {
-                moverEnemigos();
-            }
-        }, 1000, 200);
-    }
-
-    public void detenerTimer() {
-        if (timer != null) {
-            timer.cancel();
-            timer = null;
-        }
-    }
-
-    private void moverEnemigos() {
-        GameBoard gb = GameBoard.getGameBoard();
-        gb.moverEnemigos();
     }
 
     public void spawnEnemies() {
@@ -61,7 +34,7 @@ public class EnemigoManager {
                 y = random.nextInt(15);
 
                 for (Enemigo e : enemigos) {
-                    if (Math.abs(e.getX() - x) <= 1 && Math.abs(e.getY() - y) <= 1) {
+                    if (Math.abs(e.getNave().getX() - x) <= 1 && Math.abs(e.getNave().getY() - y) <= 1) {
                         positionInvalid = true;
                         break;
                     }
@@ -69,7 +42,10 @@ public class EnemigoManager {
             } while (positionInvalid);
 
             if (!positionInvalid) {
-                Enemigo nuevoEnemigo = new Enemigo(x, y);
+                // Utilizando el patrón Factory con "Malo" para la nave
+                Malo nuevaNave = (Malo) NaveFactory.getInstance().crearNave("Malo", x, y);
+                // Inyectamos la nave en el piloto
+                Enemigo nuevoEnemigo = new Enemigo(nuevaNave);
                 enemigos.add(nuevoEnemigo);
             }
         }
@@ -77,17 +53,37 @@ public class EnemigoManager {
 
     public Enemigo getEnemigoEn(int x, int y) {
         for (Enemigo e : enemigos) {
-            if (e.getX() == x && e.getY() == y) {
+            if (e.getNave().getX() == x && e.getNave().getY() == y) {
                 return e;
             }
         }
         return null;
     }
 
+    public void notificarColisionComposite(Composite c) {
+        Enemigo aEliminar = null;
+        for (Enemigo e : enemigos) {
+            if (e.getNave().getCuerpo() == c) {
+                aEliminar = e;
+                break;
+            }
+        }
+        if (aEliminar != null) {
+            removeEnemigo(aEliminar);
+        }
+    }
+
+    private List<Enemigo> enemigosAEliminar = new ArrayList<>();
+
     public void moveEnemies() {
         for (Enemigo e : enemigos) {
-            int nuevaY = e.getY() + 1;
-            e.setY(nuevaY);
+            if (!enemigosAEliminar.contains(e)) {
+                e.mover(0, 1); // El controlador mueve su nave
+            }
+        }
+        if (!enemigosAEliminar.isEmpty()) {
+            enemigos.removeAll(enemigosAEliminar);
+            enemigosAEliminar.clear();
         }
     }
 
@@ -95,8 +91,36 @@ public class EnemigoManager {
         return enemigos;
     }
 
+    public void matarEnemigoEnCoordenada(int x, int y) {
+        Enemigo aEliminar = null;
+        for (Enemigo e : enemigos) {
+            if (e.getNave().getCuerpo() != null) {
+                for (Casilla c : e.getNave().getCuerpo().getCasillasOcupadas()) {
+                    if (c.getX() == x && c.getY() == y) {
+                        aEliminar = e;
+                        break;
+                    }
+                }
+            } else if (e.getNave().getX() == x && e.getNave().getY() == y) {
+                aEliminar = e;
+            }
+            if (aEliminar != null) break;
+        }
+        if (aEliminar != null) {
+            removeEnemigo(aEliminar);
+        }
+    }
+
     public void removeEnemigo(Enemigo e) {
-        enemigos.remove(e);
-        GameBoard.getGameBoard().setCasilla(e.getX(), e.getY(), new Vacia(e.getX(), e.getY()));
+        if (!enemigosAEliminar.contains(e)) {
+            enemigosAEliminar.add(e);
+        }
+        if (e.getNave().getCuerpo() != null) {
+            for (Casilla c : e.getNave().getCuerpo().getCasillasOcupadas()) {
+                GameBoard.getGameBoard().setCasilla(c.getX(), c.getY(), new Vacia(c.getX(), c.getY()));
+            }
+        } else {
+            GameBoard.getGameBoard().setCasilla(e.getNave().getX(), e.getNave().getY(), new Vacia(e.getNave().getX(), e.getNave().getY()));
+        }
     }
 }

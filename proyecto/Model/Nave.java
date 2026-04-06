@@ -1,51 +1,30 @@
 package Model;
 
-public abstract class Nave  {
-    private boolean viva = true;
-    private Composite pixeles;
-    
-    public Nave() {
-       
-    } 
+public abstract class Nave extends Casilla {
+    protected boolean viva = true;
+    protected Composite cuerpo;
 
-    public void mover() {
-    	pixeles.moverHD();
-    	//Habría que hacer que dependiendo de la tecla pulsada se mueva uno u otro;
-    	//Luego actualizar la casilla con el state.
+    public Nave(int x, int y) {
+        super(x, y);
     }
-   /*public void mover(int dx, int dy) {
-        GameBoard board = GameBoard.getGameBoard();
-        int nuevaX = getX() + dx;
-        int nuevaY = getY() + dy;
 
-        if (board.esPosicionValida(nuevaX, nuevaY)) {
-            int viejaX = getX();
-            int viejaY = getY();
+    public void setCuerpo(Composite cuerpo) {
+        this.cuerpo = cuerpo;
+    }
 
-            if (board.hayEnemigo(nuevaX, nuevaY)) {
-                // Si hay un enemigo, la nave muere y el juego termina
-                viva = false;
-                board.finalizarJuego();
-            } else {
-                setX(nuevaX);
-                setY(nuevaY);
-                board.actualizarPosicion(viejaX, viejaY, this);
-            }
+    public Composite getCuerpo() {
+        return cuerpo;
+    }
+
+    public void mover(int dx, int dy) {
+        if (cuerpo != null) {
+            cuerpo.mover(dx, dy);
         }
-    }*/
+        setX(getX() + dx);
+        setY(getY() + dy);
+    }
 
-    /*public void disparar() {
-        int shotX = getX();
-        int shotY = getY() - 2;
-        if (shotY >= 0) {
-            Disparo nuevoDisparo = new Disparo(shotX, shotY);
-            DisparoManager.getDisparoManager().agregarDisparo(nuevoDisparo);
-        }
-    }*/
-
-   
-
-	public void removeNave() {
+    public void removeNave() {
         viva = false;
     }
 

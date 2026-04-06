@@ -1,11 +1,27 @@
 package Model;
 
-public class Disparo  {
-	private Composite pixeles;
-    public Disparo() {
+import java.util.Timer;
+import java.util.TimerTask;
+
+public class Disparo extends Casilla {
+    private Timer timer;
+
+    public Disparo(int x, int y) {
+        super(x, y);
+        iniciarMovimiento();
     }
 
-   /* public void mover() {
+    private void iniciarMovimiento() {
+        timer = new Timer();
+        timer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                mover();
+            }
+        }, 0, 50);
+    }
+
+    private void mover() {
         GameBoard gb = GameBoard.getGameBoard();
         int oldX = getX();
         int oldY = getY();
@@ -18,8 +34,8 @@ public class Disparo  {
 
         // Comprobar colisión
         Casilla ocupante = gb.getCasilla(oldX, newY);
-        if (ocupante instanceof Enemigo) {
-            EnemigoManager.getEnemigoManager().removeEnemigo((Enemigo) ocupante);
+        if (ocupante instanceof Malo) {
+            EnemigoManager.getEnemigoManager().matarEnemigoEnCoordenada(ocupante.getX(), ocupante.getY());
             detenerYBorrar(oldX, oldY);
             return;
         }
@@ -30,7 +46,9 @@ public class Disparo  {
     }
 
     private void detenerYBorrar(int x, int y) {
-        DisparoManager.getDisparoManager().eliminarDisparo(this);
+        if (timer != null) {
+            timer.cancel();
+        }
         GameBoard.getGameBoard().eliminarDisparo(x, y);
-    }*/
+    }
 }

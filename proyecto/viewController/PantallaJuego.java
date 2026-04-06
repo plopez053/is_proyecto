@@ -25,6 +25,7 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
 import Model.GameBoard;
+import Model.JugadorManager;
 
 public class PantallaJuego extends JFrame implements Observer {
 
@@ -100,23 +101,24 @@ public class PantallaJuego extends JFrame implements Observer {
 			int key = e.getKeyCode();
 			if (!juegoTerminado) {
 				if (key == KeyEvent.VK_LEFT) {
-					GameBoard.getGameBoard().getNave().mover(-1, 0);
+					JugadorManager.getInstance().moverNave(-1, 0);
 				}
 
 				if (key == KeyEvent.VK_RIGHT) {
-					GameBoard.getGameBoard().getNave().mover(1, 0);
+					JugadorManager.getInstance().moverNave(1, 0);
 				}
 
 				if (key == KeyEvent.VK_UP) {
-					GameBoard.getGameBoard().getNave().mover(0, -1);
+					JugadorManager.getInstance().moverNave(0, -1);
 				}
 				if (key == KeyEvent.VK_DOWN) {
-					GameBoard.getGameBoard().getNave().mover(0, 1);
+					JugadorManager.getInstance().moverNave(0, 1);
 				}
-			}
 
-			if (key == KeyEvent.VK_SPACE) {
-				GameBoard.getGameBoard().disparar();
+				if (key == KeyEvent.VK_SPACE) {
+					JugadorManager.getInstance().disparar();
+				}
+				GameBoard.getGameBoard().actualizarTablero();
 			}
 		}
 
