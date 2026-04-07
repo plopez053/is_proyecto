@@ -6,7 +6,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class JugadorManager {
-    private static JugadorManager instance;
+    private static JugadorManager miJugador = null;
     private Bueno nave; // Ahora es Bueno
     private List<Disparo> activos;
     private Timer timerDisparos;
@@ -15,16 +15,16 @@ public class JugadorManager {
         activos = new ArrayList<>();
     }
 
-    public static JugadorManager getInstance() {
-        if (instance == null) {
-            instance = new JugadorManager();
+    public static JugadorManager getJugador() {
+        if (miJugador == null) {
+            miJugador = new JugadorManager();
         }
-        return instance;
+        return miJugador;
     }
 
     public void inicializarJugador(int x, int y) {
         // Casteamos porque sabemos que "Bueno" devuelve un Bueno
-        nave = (Bueno) NaveFactory.getInstance().crearNave("Bueno", x, y);
+        nave = (Bueno) NaveFactory.getNaveFactory().crearNave("Bueno", x, y);
         activos.clear();
         iniciarTimerDisparos();
     }

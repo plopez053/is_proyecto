@@ -5,8 +5,8 @@ import java.util.List;
 public class Bueno extends Nave {
     private EstrategiaDisparo armaActual;
 
-    public Bueno(int x, int y) {
-        super(x, y);
+    public Bueno() {
+        super();
     }
 
     public void setArmaActual(EstrategiaDisparo arma) {
@@ -15,7 +15,7 @@ public class Bueno extends Nave {
 
     public List<Disparo> disparar() {
         if (armaActual != null) {
-            return armaActual.disparar(getX(), getY());
+            //return armaActual.disparar(getX(), getY()); 
         }
         return null;
     }

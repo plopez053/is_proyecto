@@ -3,22 +3,36 @@ package Model;
 import java.util.Collections;
 import java.util.List;
 
-public class Pixel extends Casilla implements Entidad {
-    private int entityType; // 0 para Enemigo, 1 para Nave, 2 para Disparo
+public class Pixel implements Entidad {
+	private int x, y;
+    private EstadoCasilla estado; // Patron state
 
-    public Pixel(int x, int y, int entityType) {
-        super(x, y);
-        this.entityType = entityType;
+    public Pixel(int pX, int pY, EstadoCasilla pEstado) {
+    	x = pX;
+    	y = pY;
+        this.estado = pEstado;
     }
 
-    public int getEntityType() {
-        return entityType;
+    public void cambiarEstado(EstadoCasilla pEstado) {
+    	this.estado = pEstado;
+    	
     }
-
-    public void setEntityType(int entityType) {
-        this.entityType = entityType;
+    public boolean estaOcupada() {
+    	return estado.estaOcupada();
     }
-
+    
+    public boolean esNave() {
+    	return estado.esNave();
+    }
+    
+    public boolean esEnemigo() {
+    	return estado.esEnemigo();
+    }
+    
+    public boolean esDisparo() {
+    	return estado.esDisparo();
+    }
+    
     @Override
     public void mover(int dx, int dy) {
         int oldX = getX();

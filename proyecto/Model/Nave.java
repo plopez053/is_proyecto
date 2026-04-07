@@ -1,11 +1,11 @@
 package Model;
 
-public abstract class Nave extends Casilla {
+public abstract class Nave {
     protected boolean viva = true;
     protected Composite cuerpo;
 
-    public Nave(int x, int y) {
-        super(x, y);
+    public Nave() {
+        super();
     }
 
     public void setCuerpo(Composite cuerpo) {
@@ -20,8 +20,8 @@ public abstract class Nave extends Casilla {
         if (cuerpo != null) {
             cuerpo.mover(dx, dy);
         }
-        setX(getX() + dx);
-        setY(getY() + dy);
+       // setX(getX() + dx);
+        //setY(getY() + dy);
     }
 
     public void removeNave() {

@@ -55,13 +55,13 @@ public class GameBoard extends Observable {
     }
 
     public void crearTablero() {
-        JugadorManager.getInstance().inicializarJugador(posXInicio, posYInicio);
+        JugadorManager.getJugador().inicializarJugador(posXInicio, posYInicio);
         EnemigoManager.getEnemigoManager().spawnEnemies();
         
         clearBoard();
         
         // Mostrar inicialmente las entidades
-        Nave naveC = JugadorManager.getInstance().getNave();
+        Nave naveC = JugadorManager.getJugador().getNave();
         if (naveC != null && naveC.getCuerpo() != null) {
             for (Casilla c : naveC.getCuerpo().getCasillasOcupadas()) {
                 if (c instanceof Pixel) {
@@ -100,7 +100,7 @@ public class GameBoard extends Observable {
                     if (p.getEntityType() == 0) {
                         snapshot[i][j] = 0;
                     } else if (p.getEntityType() == 1) {
-                        Nave naveInfo = JugadorManager.getInstance().getNave();
+                        Nave naveInfo = JugadorManager.getJugador().getNave();
                         if (naveInfo != null && !naveInfo.estaViva()) {
                             snapshot[i][j] = 1; // Antes era 0, lo que hacía que se dibujara verde
                         } else {
@@ -175,7 +175,7 @@ public class GameBoard extends Observable {
     }
 
     public void evaluarEstadoJuego() {
-        Nave naveC = JugadorManager.getInstance().getNave();
+        Nave naveC = JugadorManager.getJugador().getNave();
         if (naveC != null && !naveC.estaViva()) {
             detenerTimer();
             setChanged();
@@ -184,7 +184,7 @@ public class GameBoard extends Observable {
     }
 
     private void moverEnemigos() {
-        Nave naveC = JugadorManager.getInstance().getNave();
+        Nave naveC = JugadorManager.getJugador().getNave();
         EnemigoManager.getEnemigoManager().moveEnemies();
 
         boolean fin = false;
