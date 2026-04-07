@@ -24,7 +24,7 @@ public class Composite implements Entidad {
         }
     }
 
-    private boolean comprobarColisiones(int dx, int dy) {
+    private boolean comprobarColisiones(int dx, int dy) { 
         GameBoard board = GameBoard.getGameBoard();
         boolean chocoFuerte = false;
         for (Entidad ev : componentes) {
@@ -34,29 +34,25 @@ public class Composite implements Entidad {
                 int ny = p.getY() + dy;
                 
                 if (board.esPosicionValida(nx, ny)) {
-                    Casilla c = board.getCasilla(nx, ny);
-                    if (c instanceof Disparo) {
-                        JugadorManager.getInstance().eliminarDisparoActivo((Disparo)c);
+                    Pixel p1 = board.getCasilla(nx, ny);
+                    if (p1.esDisparo()) {
+                        JugadorManager.getJugador().eliminarDisparoActivo((Disparo)c); //TODO hay que cambiar el parametro
                         EnemigoManager.getEnemigoManager().notificarColisionComposite(this);
-                        chocoFuerte = true;
-                    } else if (c instanceof Pixel) {
-                        Pixel hitPixel = (Pixel) c;
-                        if ((p.getEntityType() == 0 && hitPixel.getEntityType() == 1) || 
-                            (p.getEntityType() == 1 && hitPixel.getEntityType() == 0)) {
-                            Nave n = JugadorManager.getInstance().getNave();
+                        chocoFuerte = true;                
+                    }else if ((p.esEnemigo() && p1.esNave()) || (p.esNave() && p1.esEnemigo())) {
+                            Nave n = JugadorManager.getJugador().getNave();
                             if (n != null) n.removeNave();
                             chocoFuerte = true;
-                        }
                     }
-                }
-            }
-        }
+                 }
+              }
+          }
         return chocoFuerte;
     }
 
     @Override
-    public List<Casilla> getCasillasOcupadas() {
-        List<Casilla> ocupadas = new ArrayList<>();
+    public List<Pixel> getCasillasOcupadas() {
+        List<Pixel> ocupadas = new ArrayList<>();
         for (Entidad ev : componentes) {
             ocupadas.addAll(ev.getCasillasOcupadas());
         }

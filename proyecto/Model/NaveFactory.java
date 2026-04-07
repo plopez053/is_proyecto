@@ -19,10 +19,10 @@ public class NaveFactory {
             Composite cuerpo = new Composite();
             
             // Creamos una forma básica (tipo cruz) para la nave buena
-            cuerpo.addComponente(new Pixel(x, y, 1)); // centro
-            cuerpo.addComponente(new Pixel(x - 1, y, 1)); // izquierda
-            cuerpo.addComponente(new Pixel(x + 1, y, 1)); // derecha
-            cuerpo.addComponente(new Pixel(x, y - 1, 1)); // arriba
+            cuerpo.addComponente(new Pixel(x, y, new casillaNave())); // centro
+            cuerpo.addComponente(new Pixel(x - 1, y, new casillaNave())); // izquierda
+            cuerpo.addComponente(new Pixel(x + 1, y, new casillaNave())); // derecha
+            cuerpo.addComponente(new Pixel(x, y - 1, new casillaNave())); // arriba
             
             nave.setCuerpo(cuerpo);
             nave.setArmaActual(new DisparoPixelStrategy());
@@ -32,8 +32,8 @@ public class NaveFactory {
             Composite cuerpo = new Composite();
             
             // Un cuerpo de enemigo simple de 2 pixeles (por ejemplo)
-            cuerpo.addComponente(new Pixel(x, y, 0));
-            cuerpo.addComponente(new Pixel(x + 1, y, 0));
+            cuerpo.addComponente(new Pixel(x, y, new casillaEnemigo()));
+            cuerpo.addComponente(new Pixel(x + 1, y, new casillaEnemigo()));
             
             enemigo.setCuerpo(cuerpo);
             myNave = enemigo;

@@ -5,7 +5,7 @@ import java.util.List;
 
 public class Pixel implements Entidad {
 	private int x, y;
-    private EstadoCasilla estado; // Patron state
+    private EstadoCasilla estado; // Patrón state
 
     public Pixel(int pX, int pY, EstadoCasilla pEstado) {
     	x = pX;
@@ -42,14 +42,22 @@ public class Pixel implements Entidad {
 
         GameBoard board = GameBoard.getGameBoard();
         if (board.esPosicionValida(newX, newY)) {
-            setX(newX);
-            setY(newY);
+            x = newX;
+            y = newY;
             board.actualizarPosicion(oldX, oldY, this);
         }
     }
 
     @Override
-    public List<Casilla> getCasillasOcupadas() {
+    public List<Pixel> getCasillasOcupadas() {
         return Collections.singletonList(this);
+    }
+    
+    public int getX() {
+    	return x;
+    }
+    
+    public int getY() {
+    	return y;
     }
 }

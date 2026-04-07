@@ -55,10 +55,10 @@ public class JugadorManager {
         }
     }
 
-    public void eliminarDisparoActivo(Disparo d) {
+    public void eliminarDisparoActivo(Disparo d) {  //TODO Esto genera una dependencia, no se ocmo cambiarlo
         if (activos.contains(d)) {
             activos.remove(d);
-            GameBoard.getGameBoard().eliminarDisparo(d.getX(), d.getY());
+            GameBoard.getGameBoard().eliminarDisparo(d.getX(), d.getY()); //TODO disparo no tiene getx ni gety, hay que eliminar TODOS los disparos, recorrer su lista
         }
     }
 
@@ -90,8 +90,8 @@ public class JugadorManager {
                 disparosParaEliminar.add(d);
                 board.eliminarDisparo(oldX, oldY);
             } else {
-                Casilla destino = board.getCasilla(oldX, newY);
-                if (destino instanceof Pixel && ((Pixel) destino).getEntityType() == 0) {
+                Pixel destino = board.getCasilla(oldX, newY);
+                if (destino instanceof Pixel && destino.esEnemigo()) {
                     EnemigoManager.getEnemigoManager().matarEnemigoEnCoordenada(oldX, newY);
                     disparosParaEliminar.add(d);
                     board.eliminarDisparo(oldX, oldY);

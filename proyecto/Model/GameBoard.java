@@ -8,14 +8,19 @@ public class GameBoard extends Observable {
     private static GameBoard miGameBoard;
     private final int width = 100;
     private final int height = 60;
-    private Casilla[][] matrix;
+    private Pixel[][] matrix;
     private int posXInicio = 50;
     private int posYInicio = 55;
     private Timer timer;
 
     private GameBoard() {
-        matrix = new Casilla[height][width];
-        clearBoard();
+        matrix = new Pixel[height][width];
+        for (int i=0;i<height;i++) {
+        	for(int j=0;j<width;j++) {
+        		Pixel p = new Pixel(j,i,new casillaVacia());
+        		matrix[i][j] = p;
+        	}
+        }
     }
 
     public static synchronized GameBoard getGameBoard() {
@@ -33,14 +38,14 @@ public class GameBoard extends Observable {
         return height;
     }
 
-    public Casilla getCasilla(int x, int y) {
+    public Pixel getCasilla(int x, int y) {
         if (esPosicionValida(x, y)) {
             return matrix[y][x];
         }
         return null;
     }
 
-    public void setCasilla(int x, int y, Casilla casilla) {
+    public void setCasilla(int x, int y, Pixel casilla) {
         if (esPosicionValida(x, y)) {
             matrix[y][x] = casilla;
         }
@@ -49,7 +54,8 @@ public class GameBoard extends Observable {
     public void clearBoard() {
         for (int i = 0; i < height; i++) {
             for (int j = 0; j < width; j++) {
-                matrix[i][j] = new Vacia(j, i);
+                //matrix[i][j] = new Vacia(j, i);
+            	matrix[i][j].cambiarEstado(new casillaVacia());
             }
         }
     }
@@ -63,23 +69,18 @@ public class GameBoard extends Observable {
         // Mostrar inicialmente las entidades
         Nave naveC = JugadorManager.getJugador().getNave();
         if (naveC != null && naveC.getCuerpo() != null) {
-            for (Casilla c : naveC.getCuerpo().getCasillasOcupadas()) {
-                if (c instanceof Pixel) {
-                    setCasilla(c.getX(), c.getY(), c);
-                }
+            for (Pixel p : naveC.getCuerpo().getCasillasOcupadas()) {
+                    setCasilla(p.getX(), p.getY(), p);
             }
         }
         
         for (Enemigo e : EnemigoManager.getEnemigoManager().getEnemigos()) {
             if (e.getNave().getCuerpo() != null) {
-                for (Casilla c : e.getNave().getCuerpo().getCasillasOcupadas()) {
-                    if (c instanceof Pixel) {
-                        setCasilla(c.getX(), c.getY(), c);
-                    }
+                for (Pixel p : e.getNave().getCuerpo().getCasillasOcupadas()) {
+                        setCasilla(p.getX(), p.getY(), p);
                 }
             }
         }
-
         iniciarTimer();
         setChanged();
         notifyObservers(new Object[] { 1, getBoardActual() });
@@ -94,23 +95,20 @@ public class GameBoard extends Observable {
         int[][] snapshot = new int[height][width];
         for (int i = 0; i < height; i++) {
             for (int j = 0; j < width; j++) {
-                Casilla c = matrix[i][j];
-                if (c instanceof Pixel) {
-                    Pixel p = (Pixel) c;
-                    if (p.getEntityType() == 0) {
-                        snapshot[i][j] = 0;
-                    } else if (p.getEntityType() == 1) {
-                        Nave naveInfo = JugadorManager.getJugador().getNave();
-                        if (naveInfo != null && !naveInfo.estaViva()) {
-                            snapshot[i][j] = 1; // Antes era 0, lo que hacía que se dibujara verde
-                        } else {
-                            snapshot[i][j] = 1; 
-                        }
+                Pixel p = matrix[i][j];
+                if (p.esEnemigo()) {
+                    snapshot[i][j] = 0;
+                } else if (p.esNave()) {
+                    Nave naveInfo = JugadorManager.getJugador().getNave();
+                    if (naveInfo != null && !naveInfo.estaViva()) {
+                    	snapshot[i][j] = 3; // Antes era 0, lo que hacía que se dibujara verde
+                    } else {
+                        snapshot[i][j] = 1; 
                     }
-                } else if (c instanceof Disparo) {
+                } else if (p.esDisparo()) {
                     snapshot[i][j] = 2;
                 } else {
-                    snapshot[i][j] = 3;
+                	snapshot[i][j] = 3;
                 }
             }
         }
@@ -121,11 +119,11 @@ public class GameBoard extends Observable {
         return x >= 0 && x < width && y >= 0 && y < height;
     }
 
-    public void actualizarPosicion(int viejaX, int viejaY, Casilla casilla) {
+    public void actualizarPosicion(int viejaX, int viejaY, Pixel casilla) {
         if (esPosicionValida(viejaX, viejaY)) {
             // Si la casilla antigua aún sigue apuntando al mismo objeto, la vaciamos
             if (matrix[viejaY][viejaX] == casilla) {
-                matrix[viejaY][viejaX] = new Vacia(viejaX, viejaY);
+                matrix[viejaY][viejaX].cambiarEstado(new casillaVacia());;
             }
         }
         if (esPosicionValida(casilla.getX(), casilla.getY())) {
@@ -136,20 +134,20 @@ public class GameBoard extends Observable {
 
     public void actualizarPosicionDisparo(int oldX, int oldY, Disparo d) {
         if (esPosicionValida(oldX, oldY)) {
-            if (matrix[oldY][oldX] instanceof Disparo) {
-                matrix[oldY][oldX] = new Vacia(oldX, oldY);
+            if (matrix[oldY][oldX].esDisparo()) { //Se marca como casilla vacía
+                matrix[oldY][oldX].cambiarEstado(new casillaVacia());
             }
         }
         if (esPosicionValida(d.getX(), d.getY())) {
-            matrix[d.getY()][d.getX()] = d;
+            matrix[d.getY()][d.getX()].cambiarEstado(new casillaDisparo());;
         }
         actualizarTablero();
     }
 
     public void eliminarDisparo(int x, int y) {
         if (esPosicionValida(x, y)) {
-            if (matrix[y][x] instanceof Disparo) {
-                matrix[y][x] = new Vacia(x, y);
+            if (matrix[y][x].esDisparo()) {
+                matrix[y][x].cambiarEstado(new casillaVacia());;
             }
         }
         actualizarTablero();
@@ -189,10 +187,12 @@ public class GameBoard extends Observable {
 
         boolean fin = false;
         for (Enemigo e : EnemigoManager.getEnemigoManager().getEnemigos()) {
-            if (e.getNave().getY() >= height) {
-                fin = true;
-                break;
-            }
+        	for (Pixel p: e.getNave().getCuerpo().getCasillasOcupadas()) { //Se recorre la lista de casillas de cada enemigo
+        		 if (p.getY() >= height) {
+ 	                fin = true;
+ 	                break;
+ 	            }
+        	}    
         }
         
         if (naveC != null && !naveC.estaViva()) {

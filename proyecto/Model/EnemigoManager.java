@@ -34,16 +34,22 @@ public class EnemigoManager {
                 y = random.nextInt(15);
 
                 for (Enemigo e : enemigos) {
-                    if (Math.abs(e.getNave().getX() - x) <= 1 && Math.abs(e.getNave().getY() - y) <= 1) {
-                        positionInvalid = true;
-                        break;
-                    }
+                	if (e.getNave().getCuerpo().getCasillasOcupadas()!=null) {
+                		for (Pixel p: e.getNave().getCuerpo().getCasillasOcupadas()) {
+                			if (Math.abs(p.getX() - x) <= 1 && Math.abs(p.getY() - y) <= 1) {
+                                positionInvalid = true;
+                                break;
+                            }
+                		}
+                		
+                	}
+                    
                 }
             } while (positionInvalid);
 
             if (!positionInvalid) {
                 // Utilizando el patrón Factory con "Malo" para la nave
-                Malo nuevaNave = (Malo) NaveFactory.getInstance().crearNave("Malo", x, y);
+                Malo nuevaNave = (Malo) NaveFactory.getNaveFactory().crearNave("Malo", x, y);
                 // Inyectamos la nave en el piloto
                 Enemigo nuevoEnemigo = new Enemigo(nuevaNave);
                 enemigos.add(nuevoEnemigo);
@@ -53,8 +59,13 @@ public class EnemigoManager {
 
     public Enemigo getEnemigoEn(int x, int y) {
         for (Enemigo e : enemigos) {
-            if (e.getNave().getX() == x && e.getNave().getY() == y) {
-                return e;
+            if (e.getNave().getCuerpo()!=null) {
+            	for (Pixel p: e.getNave().getCuerpo().getCasillasOcupadas()) {
+            		if (p.getX() == x && p.getY() == y) {
+                        return e;
+
+            		}
+            	}
             }
         }
         return null;
@@ -95,14 +106,12 @@ public class EnemigoManager {
         Enemigo aEliminar = null;
         for (Enemigo e : enemigos) {
             if (e.getNave().getCuerpo() != null) {
-                for (Casilla c : e.getNave().getCuerpo().getCasillasOcupadas()) {
-                    if (c.getX() == x && c.getY() == y) {
+                for (Pixel p : e.getNave().getCuerpo().getCasillasOcupadas()) {
+                    if (p.getX() == x && p.getY() == y) {
                         aEliminar = e;
                         break;
                     }
                 }
-            } else if (e.getNave().getX() == x && e.getNave().getY() == y) {
-                aEliminar = e;
             }
             if (aEliminar != null) break;
         }
@@ -116,11 +125,10 @@ public class EnemigoManager {
             enemigosAEliminar.add(e);
         }
         if (e.getNave().getCuerpo() != null) {
-            for (Casilla c : e.getNave().getCuerpo().getCasillasOcupadas()) {
-                GameBoard.getGameBoard().setCasilla(c.getX(), c.getY(), new Vacia(c.getX(), c.getY()));
+            for (Pixel p : e.getNave().getCuerpo().getCasillasOcupadas()) {
+            	p.cambiarEstado(new casillaVacia());
+                GameBoard.getGameBoard().setCasilla(p.getX(), p.getY(), p);
             }
-        } else {
-            GameBoard.getGameBoard().setCasilla(e.getNave().getX(), e.getNave().getY(), new Vacia(e.getNave().getX(), e.getNave().getY()));
         }
     }
 }

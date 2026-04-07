@@ -3,11 +3,10 @@ package Model;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class Disparo extends Casilla {
+public class Disparo {
     private Timer timer;
 
-    public Disparo(int x, int y) {
-        super(x, y);
+    public Disparo() {
         iniciarMovimiento();
     }
 
@@ -23,8 +22,8 @@ public class Disparo extends Casilla {
 
     private void mover() {
         GameBoard gb = GameBoard.getGameBoard();
-        int oldX = getX();
-        int oldY = getY();
+        int oldX = getX(); //TODO creo que esto sobra, porque puede haber mas de un disparo y habría q actualizar todas
+        int oldY = getY(); //TODO esto tb
         int newY = oldY - 1;
 
         if (newY < 0) {
@@ -33,15 +32,15 @@ public class Disparo extends Casilla {
         }
 
         // Comprobar colisión
-        Casilla ocupante = gb.getCasilla(oldX, newY);
-        if (ocupante instanceof Malo) {
+        Pixel ocupante = gb.getCasilla(oldX, newY);
+        if (ocupante.esEnemigo()) {
             EnemigoManager.getEnemigoManager().matarEnemigoEnCoordenada(ocupante.getX(), ocupante.getY());
             detenerYBorrar(oldX, oldY);
             return;
         }
 
         // Actualizar posición en la matriz
-        setY(newY);
+        setY(newY);//TODO esto tb
         gb.actualizarPosicionDisparo(oldX, oldY, this);
     }
 

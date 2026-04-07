@@ -58,7 +58,7 @@ public class DisparoManager {
             copiaDisparos = new ArrayList<>(disparos);
         }
         for (Disparo d : copiaDisparos) {
-            d.mover();
+            d.mover(); /
         }
     }
 }
