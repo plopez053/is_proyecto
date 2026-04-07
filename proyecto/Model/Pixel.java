@@ -3,20 +3,56 @@ package Model;
 import java.util.Collections;
 import java.util.List;
 
-public class Pixel extends Casilla implements Entidad {
-    private int entityType; // 0 para Enemigo, 1 para Nave, 2 para Disparo
+public class Pixel implements Entidad {
+    protected int x;
+    protected int y;
+    protected EstadoCasilla estado;
+    private Object owner;
 
-    public Pixel(int x, int y, int entityType) {
-        super(x, y);
-        this.entityType = entityType;
+    public Pixel(int x, int y, EstadoCasilla estado) {
+        this.x = x;
+        this.y = y;
+        this.estado = estado;
     }
 
-    public int getEntityType() {
-        return entityType;
+    public Object getOwner() { return owner; }
+    public void setOwner(Object owner) { this.owner = owner; }
+
+    public int getX() { return x; }
+    public void setX(int x) { this.x = x; }
+    public int getY() { return y; }
+    public void setY(int y) { this.y = y; }
+
+    public EstadoCasilla getEstado() {
+        return estado;
     }
 
-    public void setEntityType(int entityType) {
-        this.entityType = entityType;
+    public void setEstado(EstadoCasilla estado) {
+        this.estado = estado;
+    }
+
+    public boolean esEnemigo() { return estado.esEnemigo(); }
+    public boolean esNave() { return estado.esNave(); }
+    public boolean esDisparo() { return estado.esDisparo(); }
+    public boolean estaOcupada() { return estado.estaOcupada(); }
+
+    @Override
+    public boolean canMove(int dx, int dy) {
+        return GameBoard.getGameBoard().esPosicionValida(x + dx, y + dy);
+    }
+
+    @Override
+    public void dibujar(GameBoard gb) {
+        synchronized(gb) {
+            gb.setPixel(x, y, this);
+        }
+    }
+
+    @Override
+    public void borrar(GameBoard gb) {
+        synchronized(gb) {
+            gb.setPixel(x, y, null);
+        }
     }
 
     @Override
@@ -27,15 +63,21 @@ public class Pixel extends Casilla implements Entidad {
         int newY = oldY + dy;
 
         GameBoard board = GameBoard.getGameBoard();
-        if (board.esPosicionValida(newX, newY)) {
-            setX(newX);
-            setY(newY);
-            board.actualizarPosicion(oldX, oldY, this);
+        Pixel ocupante = board.getPixel(newX, newY);
+        
+        // Delegamos la colisión al GameBoard
+        if (board.gestionarColision(this, ocupante)) {
+            return;
         }
+
+        setX(newX);
+        setY(newY);
+        board.actualizarPosicion(oldX, oldY, this);
+        board.actualizarTablero();
     }
 
     @Override
-    public List<Casilla> getCasillasOcupadas() {
+    public List<Pixel> getPixelesOcupados() {
         return Collections.singletonList(this);
     }
 }

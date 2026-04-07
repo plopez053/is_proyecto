@@ -1,11 +1,27 @@
 package Model;
 
-public abstract class Nave extends Casilla {
+public abstract class Nave {
     protected boolean viva = true;
     protected Composite cuerpo;
 
     public Nave(int x, int y) {
-        super(x, y);
+        // Inicializamos sin guardar x,y locales
+    }
+
+    public int getX() {
+        java.util.List<Pixel> pixeles = getPixelesOcupados();
+        if (!pixeles.isEmpty()) {
+            return pixeles.get(0).getX();
+        }
+        return 0;
+    }
+
+    public int getY() {
+        java.util.List<Pixel> pixeles = getPixelesOcupados();
+        if (!pixeles.isEmpty()) {
+            return pixeles.get(0).getY();
+        }
+        return 0;
     }
 
     public void setCuerpo(Composite cuerpo) {
@@ -17,11 +33,24 @@ public abstract class Nave extends Casilla {
     }
 
     public void mover(int dx, int dy) {
+        if (!viva)
+            return;
+
+        // Delegamos la validación al Composite (siguiendo el diagrama UML)
+        if (cuerpo != null && !cuerpo.canMove(dx, dy)) {
+            return;
+        }
+
         if (cuerpo != null) {
             cuerpo.mover(dx, dy);
         }
-        setX(getX() + dx);
-        setY(getY() + dy);
+    }
+
+    public java.util.List<Pixel> getPixelesOcupados() {
+        if (cuerpo != null) {
+            return cuerpo.getPixelesOcupados();
+        }
+        return new java.util.ArrayList<>();
     }
 
     public void removeNave() {
@@ -31,4 +60,9 @@ public abstract class Nave extends Casilla {
     public boolean estaViva() {
         return viva;
     }
+
+    public java.util.List<Disparo> disparar() {
+        return null;
+    }
 }
+

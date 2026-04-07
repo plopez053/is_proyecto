@@ -1,18 +1,18 @@
 package Model;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.ArrayList;
 
 public class JugadorManager {
     private static JugadorManager instance;
-    private Bueno nave; // Ahora es Bueno
-    private List<Disparo> activos;
+    private Nave nave;
+    private List<Disparo> disparosActivos;
     private Timer timerDisparos;
 
     private JugadorManager() {
-        activos = new ArrayList<>();
+        disparosActivos = new ArrayList<>();
     }
 
     public static JugadorManager getInstance() {
@@ -23,18 +23,21 @@ public class JugadorManager {
     }
 
     public void inicializarJugador(int x, int y) {
-        // Casteamos porque sabemos que "Bueno" devuelve un Bueno
-        nave = (Bueno) NaveFactory.getInstance().crearNave("Bueno", x, y);
-        activos.clear();
+        nave = NaveFactory.getInstance().crearNave("Bueno", x, y);
+        disparosActivos = new ArrayList<>();
+        if (nave != null && nave.getCuerpo() != null) {
+            nave.getCuerpo().dibujar(GameBoard.getGameBoard());
+        }
         iniciarTimerDisparos();
     }
 
-    public Bueno getNave() {
+    public Nave getNave() {
         return nave;
     }
 
+
     public List<Disparo> getDisparosActivos() {
-        return activos;
+        return disparosActivos;
     }
 
     public void moverNave(int dx, int dy) {
@@ -48,17 +51,20 @@ public class JugadorManager {
 
     public void disparar() {
         if (nave != null && nave.estaViva()) {
-            List<Disparo> nuevosDisparos = nave.disparar(); // Bueno tiene el método disparar
+            List<Disparo> nuevosDisparos = nave.disparar();
             if (nuevosDisparos != null) {
-                activos.addAll(nuevosDisparos);
+                disparosActivos.addAll(nuevosDisparos);
+                for (Disparo d : nuevosDisparos) {
+                    d.dibujar(GameBoard.getGameBoard());
+                }
             }
         }
     }
 
     public void eliminarDisparoActivo(Disparo d) {
-        if (activos.contains(d)) {
-            activos.remove(d);
-            GameBoard.getGameBoard().eliminarDisparo(d.getX(), d.getY());
+        if (disparosActivos != null) {
+            disparosActivos.remove(d);
+            d.borrar(GameBoard.getGameBoard());
         }
     }
 
@@ -74,33 +80,13 @@ public class JugadorManager {
             }
         };
         timerDisparos = new Timer();
-        timerDisparos.schedule(task, 0, 50); // Mueve los disparos cada 50ms
+        timerDisparos.schedule(task, 0, 50);
     }
 
     private void moverDisparos() {
-        List<Disparo> disparosParaEliminar = new ArrayList<>();
-        GameBoard board = GameBoard.getGameBoard();
-
-        for (Disparo d : activos) {
-            int oldX = d.getX();
-            int oldY = d.getY();
-            int newY = oldY - 1; // El disparo sube
-
-            if (newY < 0) {
-                disparosParaEliminar.add(d);
-                board.eliminarDisparo(oldX, oldY);
-            } else {
-                Casilla destino = board.getCasilla(oldX, newY);
-                if (destino instanceof Pixel && ((Pixel) destino).getEntityType() == 0) {
-                    EnemigoManager.getEnemigoManager().matarEnemigoEnCoordenada(oldX, newY);
-                    disparosParaEliminar.add(d);
-                    board.eliminarDisparo(oldX, oldY);
-                } else {
-                    d.setY(newY);
-                    board.actualizarPosicionDisparo(oldX, oldY, d);
-                }
-            }
+        List<Disparo> copia = new ArrayList<>(disparosActivos);
+        for (Disparo d : copia) {
+            d.mover(0, -1);
         }
-        activos.removeAll(disparosParaEliminar);
     }
 }

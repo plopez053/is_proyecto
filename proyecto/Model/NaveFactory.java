@@ -15,29 +15,38 @@ public class NaveFactory {
     public Nave crearNave(String tipo, int x, int y) {
         Nave myNave = null;
         if (tipo.equalsIgnoreCase("Bueno")) {
-            Bueno nave = new Bueno(x, y);
+            Bueno bueno = new Bueno(x, y);
             Composite cuerpo = new Composite();
             
             // Creamos una forma básica (tipo cruz) para la nave buena
-            cuerpo.addComponente(new Pixel(x, y, 1)); // centro
-            cuerpo.addComponente(new Pixel(x - 1, y, 1)); // izquierda
-            cuerpo.addComponente(new Pixel(x + 1, y, 1)); // derecha
-            cuerpo.addComponente(new Pixel(x, y - 1, 1)); // arriba
+            Pixel p1 = new Pixel(x, y, new casillaNave()); p1.setOwner(bueno);
+            Pixel p2 = new Pixel(x - 1, y, new casillaNave()); p2.setOwner(bueno);
+            Pixel p3 = new Pixel(x + 1, y, new casillaNave()); p3.setOwner(bueno);
+            Pixel p4 = new Pixel(x, y - 1, new casillaNave()); p4.setOwner(bueno);
             
-            nave.setCuerpo(cuerpo);
-            nave.setArmaActual(new DisparoPixelStrategy());
-            myNave = nave;
+            cuerpo.addComponente(p1);
+            cuerpo.addComponente(p2);
+            cuerpo.addComponente(p3);
+            cuerpo.addComponente(p4);
+            
+            bueno.setCuerpo(cuerpo);
+            bueno.setArmaActual(new DisparoPixelStrategy());
+            myNave = bueno;
         } else if (tipo.equalsIgnoreCase("Malo")) {
-            Malo enemigo = new Malo(x, y);
+            Malo malo = new Malo(x, y);
             Composite cuerpo = new Composite();
             
             // Un cuerpo de enemigo simple de 2 pixeles (por ejemplo)
-            cuerpo.addComponente(new Pixel(x, y, 0));
-            cuerpo.addComponente(new Pixel(x + 1, y, 0));
+            Pixel p1 = new Pixel(x, y, new casillaEnemigo()); p1.setOwner(malo);
+            Pixel p2 = new Pixel(x + 1, y, new casillaEnemigo()); p2.setOwner(malo);
             
-            enemigo.setCuerpo(cuerpo);
-            myNave = enemigo;
+            cuerpo.addComponente(p1);
+            cuerpo.addComponente(p2);
+            
+            malo.setCuerpo(cuerpo);
+            myNave = malo;
         }
+
         return myNave;
     }
 }

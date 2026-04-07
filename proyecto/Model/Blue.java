@@ -1,7 +1,7 @@
 package Model;
 
 public class Blue extends Bueno {
-	public Blue() {
-		super();
-	}
+    public Blue(int x, int y) {
+        super(x, y);
+    }
 }

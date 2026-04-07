@@ -1,54 +1,54 @@
 package Model;
 
-import java.util.Timer;
-import java.util.TimerTask;
-
-public class Disparo extends Casilla {
-    private Timer timer;
+public class Disparo {
+    private Composite cuerpo;
 
     public Disparo(int x, int y) {
-        super(x, y);
-        iniciarMovimiento();
+        this.cuerpo = new Composite();
+        Pixel p = new Pixel(x, y, new casillaDisparo());
+        p.setOwner(this);
+        this.cuerpo.addComponente(p); // Proyectil
     }
 
-    private void iniciarMovimiento() {
-        timer = new Timer();
-        timer.scheduleAtFixedRate(new TimerTask() {
-            @Override
-            public void run() {
-                mover();
-            }
-        }, 0, 50);
+    public int getX() {
+        return cuerpo.getPixelesOcupados().get(0).getX();
     }
 
-    private void mover() {
-        GameBoard gb = GameBoard.getGameBoard();
-        int oldX = getX();
-        int oldY = getY();
-        int newY = oldY - 1;
+    public int getY() {
+        return cuerpo.getPixelesOcupados().get(0).getY();
+    }
 
-        if (newY < 0) {
-            detenerYBorrar(oldX, oldY);
+    public void mover(int dx, int dy) {
+        if (!canMove(dx, dy)) {
+            JugadorManager.getInstance().eliminarDisparoActivo(this);
             return;
         }
 
-        // Comprobar colisión
-        Casilla ocupante = gb.getCasilla(oldX, newY);
-        if (ocupante instanceof Malo) {
-            EnemigoManager.getEnemigoManager().matarEnemigoEnCoordenada(ocupante.getX(), ocupante.getY());
-            detenerYBorrar(oldX, oldY);
-            return;
-        }
-
-        // Actualizar posición en la matriz
-        setY(newY);
-        gb.actualizarPosicionDisparo(oldX, oldY, this);
+        // El movimiento del cuerpo invocará Pixel.mover(), 
+        // el cual delegará la colisión al GameBoard.
+        cuerpo.mover(dx, dy);
     }
 
-    private void detenerYBorrar(int x, int y) {
-        if (timer != null) {
-            timer.cancel();
+    public void dibujar(GameBoard gb) {
+        if (cuerpo != null) {
+            cuerpo.dibujar(gb);
         }
-        GameBoard.getGameBoard().eliminarDisparo(x, y);
+    }
+
+    public void borrar(GameBoard gb) {
+        if (cuerpo != null) {
+            cuerpo.borrar(gb);
+        }
+    }
+
+    public boolean canMove(int dx, int dy) {
+        if (cuerpo != null) {
+            return cuerpo.canMove(dx, dy);
+        }
+        return false;
+    }
+
+    public Composite getCuerpo() {
+        return cuerpo;
     }
 }

@@ -1,4 +1,6 @@
 package Model;
+import java.util.Collections;
+import java.util.List;
 
 public class Enemigo {
     private Malo miNave;
@@ -16,4 +18,9 @@ public class Enemigo {
             miNave.mover(dx, dy);
         }
     }
+
+    public List<Pixel> getPixelesOcupados() {
+        return miNave != null ? miNave.getPixelesOcupados() : Collections.emptyList();
+    }
 }
+

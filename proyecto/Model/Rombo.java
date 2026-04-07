@@ -1,15 +1,11 @@
 package Model;
 
-public class Rombo implements StrategyDisparo {
-	private Composite pixeles;
-	public Rombo() {
-		
-	}
-	
-	@Override
-	public void disparar() {
-		// TODO Auto-generated method stub
-		
-	}
+import java.util.Collections;
+import java.util.List;
 
+public class Rombo implements EstrategiaDisparo {
+    @Override
+    public List<Disparo> disparar(int xCentral, int yCentral) {
+        return Collections.emptyList();
+    }
 }

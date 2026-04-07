@@ -1,13 +1,11 @@
 package Model;
 
-public class Flecha implements StrategyDisparo {
-	private Composite pixeles;
-	public Flecha() {
-		
-	}
-	@Override
-	public void disparar() {
-		// TODO Auto-generated method stub
-		
-	}
+import java.util.Collections;
+import java.util.List;
+
+public class Flecha implements EstrategiaDisparo {
+    @Override
+    public List<Disparo> disparar(int xCentral, int yCentral) {
+        return Collections.emptyList();
+    }
 }

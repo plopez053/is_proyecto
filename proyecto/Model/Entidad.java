@@ -1,8 +1,13 @@
 package Model;
 
-import java.util.List;
-
 public interface Entidad {
     void mover(int dx, int dy);
-    List<Casilla> getCasillasOcupadas();
+
+    boolean canMove(int dx, int dy);
+
+    void dibujar(GameBoard gb);
+
+    void borrar(GameBoard gb);
+
+    java.util.List<Pixel> getPixelesOcupados();
 }
