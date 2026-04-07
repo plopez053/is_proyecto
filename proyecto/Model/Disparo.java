@@ -11,11 +11,17 @@ public class Disparo {
     }
 
     public int getX() {
-        return cuerpo.getPixelesOcupados().get(0).getX();
+        if (cuerpo != null && !cuerpo.getPixelesOcupados().isEmpty()) {
+            return cuerpo.getPixelesOcupados().get(0).getX();
+        }
+        return -1;
     }
 
     public int getY() {
-        return cuerpo.getPixelesOcupados().get(0).getY();
+        if (cuerpo != null && !cuerpo.getPixelesOcupados().isEmpty()) {
+            return cuerpo.getPixelesOcupados().get(0).getY();
+        }
+        return -1;
     }
 
     public void mover(int dx, int dy) {

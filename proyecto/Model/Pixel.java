@@ -31,6 +31,10 @@ public class Pixel implements Entidad {
         this.estado = estado;
     }
 
+    public void cambiarEstado(EstadoCasilla pEstado) {
+        this.estado = pEstado;
+    }
+
     public boolean esEnemigo() { return estado.esEnemigo(); }
     public boolean esNave() { return estado.esNave(); }
     public boolean esDisparo() { return estado.esDisparo(); }
@@ -79,5 +83,10 @@ public class Pixel implements Entidad {
     @Override
     public List<Pixel> getPixelesOcupados() {
         return Collections.singletonList(this);
+    }
+    
+    // Método para compatibilidad con código de compañeros que use getCasillasOcupadas
+    public List<Pixel> getCasillasOcupadas() {
+        return getPixelesOcupados();
     }
 }

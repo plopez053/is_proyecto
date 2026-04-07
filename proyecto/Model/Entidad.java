@@ -1,5 +1,7 @@
 package Model;
 
+import java.util.List;
+
 public interface Entidad {
     void mover(int dx, int dy);
 
@@ -9,5 +11,10 @@ public interface Entidad {
 
     void borrar(GameBoard gb);
 
-    java.util.List<Pixel> getPixelesOcupados();
+    List<Pixel> getPixelesOcupados();
+    
+    // Alias para compatibilidad
+    default List<Pixel> getCasillasOcupadas() {
+        return getPixelesOcupados();
+    }
 }

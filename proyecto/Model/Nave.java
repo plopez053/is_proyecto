@@ -1,5 +1,8 @@
 package Model;
 
+import java.util.Collections;
+import java.util.List;
+
 public abstract class Nave {
     protected boolean viva = true;
     protected Composite cuerpo;
@@ -9,7 +12,7 @@ public abstract class Nave {
     }
 
     public int getX() {
-        java.util.List<Pixel> pixeles = getPixelesOcupados();
+        List<Pixel> pixeles = getPixelesOcupados();
         if (!pixeles.isEmpty()) {
             return pixeles.get(0).getX();
         }
@@ -17,7 +20,7 @@ public abstract class Nave {
     }
 
     public int getY() {
-        java.util.List<Pixel> pixeles = getPixelesOcupados();
+        List<Pixel> pixeles = getPixelesOcupados();
         if (!pixeles.isEmpty()) {
             return pixeles.get(0).getY();
         }
@@ -46,11 +49,16 @@ public abstract class Nave {
         }
     }
 
-    public java.util.List<Pixel> getPixelesOcupados() {
+    public List<Pixel> getPixelesOcupados() {
         if (cuerpo != null) {
             return cuerpo.getPixelesOcupados();
         }
-        return new java.util.ArrayList<>();
+        return Collections.emptyList();
+    }
+    
+    // Alias para compatibilidad con código de compañeros
+    public List<Pixel> getCasillasOcupadas() {
+        return getPixelesOcupados();
     }
 
     public void removeNave() {
@@ -61,8 +69,7 @@ public abstract class Nave {
         return viva;
     }
 
-    public java.util.List<Disparo> disparar() {
+    public List<Disparo> disparar() {
         return null;
     }
 }
-

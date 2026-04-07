@@ -15,7 +15,7 @@ public class Bueno extends Nave {
 
     public List<Disparo> disparar() {
         if (armaActual != null) {
-            return armaActual.disparar(getX(), getY());
+            return armaActual.disparar(getX(), getY()); 
         }
         return null;
     }

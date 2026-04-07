@@ -12,6 +12,11 @@ public class NaveFactory {
         return instance;
     }
 
+    // Para compatibilidad con código de compañeros
+    public static NaveFactory getNaveFactory() {
+        return getInstance();
+    }
+
     public Nave crearNave(String tipo, int x, int y) {
         Nave myNave = null;
         if (tipo.equalsIgnoreCase("Bueno")) {

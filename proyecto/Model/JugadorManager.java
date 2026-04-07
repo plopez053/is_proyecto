@@ -22,6 +22,11 @@ public class JugadorManager {
         return instance;
     }
 
+    // Alias para compatibilidad con el código de los compañeros
+    public static JugadorManager getJugador() {
+        return getInstance();
+    }
+
     public void inicializarJugador(int x, int y) {
         nave = NaveFactory.getInstance().crearNave("Bueno", x, y);
         disparosActivos = new ArrayList<>();
@@ -34,7 +39,6 @@ public class JugadorManager {
     public Nave getNave() {
         return nave;
     }
-
 
     public List<Disparo> getDisparosActivos() {
         return disparosActivos;
@@ -62,7 +66,7 @@ public class JugadorManager {
     }
 
     public void eliminarDisparoActivo(Disparo d) {
-        if (disparosActivos != null) {
+        if (disparosActivos != null && disparosActivos.contains(d)) {
             disparosActivos.remove(d);
             d.borrar(GameBoard.getGameBoard());
         }
@@ -86,6 +90,7 @@ public class JugadorManager {
     private void moverDisparos() {
         List<Disparo> copia = new ArrayList<>(disparosActivos);
         for (Disparo d : copia) {
+            // El movimiento del proyectil ahora disparará la lógica de colisiones en GameBoard
             d.mover(0, -1);
         }
     }

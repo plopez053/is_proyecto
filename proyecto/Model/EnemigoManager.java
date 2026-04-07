@@ -3,7 +3,6 @@ package Model;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -59,8 +58,22 @@ public class EnemigoManager {
                 y = random.nextInt(15);
 
                 // Comprobamos si la casilla central de spawn ya tiene algo
-                if (board.getPixel(x, y) != null || board.getPixel(x + 1, y) != null) {
+                Pixel p = board.getPixel(x, y);
+                if (p != null && (p.esEnemigo() || p.esNave() || p.esDisparo())) {
                     positionInvalid = true;
+                }
+                
+                // Chequeo de proximidad con otros enemigos (lógica de compañeros)
+                for (Enemigo e : enemigos) {
+                    if (e.getNave().getCuerpo() != null) {
+                        for (Pixel ep : e.getNave().getPixelesOcupados()) {
+                            if (Math.abs(ep.getX() - x) <= 1 && Math.abs(ep.getY() - y) <= 1) {
+                                positionInvalid = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (positionInvalid) break;
                 }
             } while (positionInvalid);
 
@@ -68,7 +81,6 @@ public class EnemigoManager {
                 Malo nuevaNave = (Malo) NaveFactory.getInstance().crearNave("Malo", x, y);
                 Enemigo nuevoEnemigo = new Enemigo(nuevaNave);
                 enemigos.add(nuevoEnemigo);
-                // Dibujamos el enemigo en el tablero
                 if (nuevaNave.getCuerpo() != null) {
                     nuevaNave.getCuerpo().dibujar(board);
                 }
@@ -108,7 +120,6 @@ public class EnemigoManager {
         List<Enemigo> copia = new ArrayList<>(enemigos);
         for (Enemigo e : copia) {
             if (!enemigosAEliminar.contains(e)) {
-                // El movimiento interno del pixel ya actualiza el GameBoard
                 e.mover(0, 1);
             }
         }

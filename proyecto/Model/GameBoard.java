@@ -38,10 +38,20 @@ public class GameBoard extends Observable {
         return null;
     }
 
+    // Para compatibilidad con código de compañeros
+    public Pixel getCasilla(int x, int y) {
+        return getPixel(x, y);
+    }
+
     public void setPixel(int x, int y, Pixel p) {
         if (esPosicionValida(x, y)) {
             matrix[y][x] = p;
         }
+    }
+
+    // Para compatibilidad con código de compañeros
+    public void setCasilla(int x, int y, Pixel p) {
+        setPixel(x, y, p);
     }
 
     public void clearBoard() {
@@ -178,7 +188,6 @@ public class GameBoard extends Observable {
             setChanged();
             notifyObservers(new Object[] { 2, getBoardActual() });
         } else {
-            // Un solo redibujado tras terminar de procesar a todos los enemigos
             actualizarTablero();
         }
     }
