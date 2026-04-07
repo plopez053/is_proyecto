@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class DisparoManager {
+public class DisparoManager { //TODO creo q esta clase tb sobra por lo q nos dijo ander, hay q hacerlo con el patrón strategy
     private static DisparoManager miDisparoManager;
     private List<Disparo> disparos;
     private Timer timer;

@@ -138,7 +138,7 @@ public class GameBoard extends Observable {
                 matrix[oldY][oldX].cambiarEstado(new casillaVacia());
             }
         }
-        if (esPosicionValida(d.getX(), d.getY())) {
+        if (esPosicionValida(d.getX(), d.getY())) { //TODO hacer que se muevan todos los disparos, multipixel
             matrix[d.getY()][d.getX()].cambiarEstado(new casillaDisparo());;
         }
         actualizarTablero();
