@@ -210,11 +210,17 @@ public class PantallaJuego extends JFrame implements Observer {
 				}
 				panel.repaint();
 				if (fin == 2) {
-					JOptionPane.showMessageDialog(contentPane, "GAME OVER", "TRY IT AGAIN",
-							JOptionPane.INFORMATION_MESSAGE);
-					juegoTerminado = true;
-					System.exit(0); // Se cierra la pantalla. Pero igual es mejor forma hacer que al pulsar OK,
-									// vuelva a la pantalla ppal para reiniciar juego.
+				    JOptionPane.showMessageDialog(contentPane, "GAME OVER", "TRY IT AGAIN",
+				            JOptionPane.INFORMATION_MESSAGE);
+				    
+				    juegoTerminado = true;
+				    GameBoard.getGameBoard().deleteObserver(this);
+				    this.dispose();  // cierra la ventana actual 
+				    
+				    //Abre la pantalla principal
+				    EventQueue.invokeLater(() -> {
+				        new PantallaPrincipal().setVisible(true);
+				    });
 				}
 			});
 		}
