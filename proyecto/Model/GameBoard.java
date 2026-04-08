@@ -10,6 +10,7 @@ public class GameBoard extends Observable {
     private int posXInicio = 50;
     private int posYInicio = 55;
     private boolean juegoFinalizado = false;
+    private String tipoNave;
 
     private GameBoard() {
         matrix = new Pixel[height][width];
@@ -65,6 +66,7 @@ public class GameBoard extends Observable {
     public void crearTablero() {
         clearBoard();
         juegoFinalizado = false;
+        JugadorManager.getJugador().setTipoNave(tipoNave);
         JugadorManager.getInstance().inicializarJugador(posXInicio, posYInicio);
         EnemigoManager.getEnemigoManager().spawnEnemies();
 
@@ -93,7 +95,16 @@ public class GameBoard extends Observable {
                 } else if (p.esEnemigo()) {
                     snapshot[i][j] = 0;
                 } else if (p.esNave()) {
-                    snapshot[i][j] = 1;
+                	String tipoN = getTipoNave();
+                	if("BUENO_RED".equals(tipoN)) {
+                		snapshot[i][j] = 1;
+                	}else if("BUENO_GREEN".equals(tipoN)) {
+                		snapshot[i][j] = 4;
+                	}else if ("BUENO_BLUE".equals(tipoN)) {
+                		snapshot[i][j] = 5;
+                	}else {
+                    snapshot[i][j] = 1; //caso default
+                	}
                 } else {
                     snapshot[i][j] = 3;
                 }
@@ -191,4 +202,13 @@ public class GameBoard extends Observable {
             actualizarTablero();
         }
     }
+    
+    public void setTipoNave(String tipo) {
+        this.tipoNave = tipo;
+    }
+
+	public String getTipoNave() {
+		
+		return this.tipoNave;
+	}
 }

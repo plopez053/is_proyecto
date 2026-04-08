@@ -201,6 +201,14 @@ public class PantallaJuego extends JFrame implements Observer {
 							labels[i][j].setOpaque(true);
 							labels[i][j].setBackground(Color.YELLOW);
 							labels[i][j].setBorder(BorderFactory.createLineBorder(Color.gray));
+						} else if (tipo == 4) { // nave de color verde
+							labels[i][j].setOpaque(true);
+							labels[i][j].setBackground(Color.green);
+							labels[i][j].setBorder(BorderFactory.createLineBorder(Color.gray));
+						} else if (tipo == 5) { // nave de color azul
+							labels[i][j].setOpaque(true);
+							labels[i][j].setBackground(Color.BLUE);
+							labels[i][j].setBorder(BorderFactory.createLineBorder(Color.gray));
 						} else { // Vacia
 							labels[i][j].setOpaque(false);
 							labels[i][j].setBorder(null);

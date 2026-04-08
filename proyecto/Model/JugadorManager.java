@@ -10,6 +10,7 @@ public class JugadorManager {
     private Nave nave;
     private List<Disparo> disparosActivos;
     private Timer timerDisparos;
+    private String tipoNave;
 
     private JugadorManager() {
         disparosActivos = new ArrayList<>();
@@ -28,7 +29,10 @@ public class JugadorManager {
     }
 
     public void inicializarJugador(int x, int y) {
-        nave = NaveFactory.getInstance().crearNave("Bueno", x, y);
+    	if (tipoNave == null) {
+            tipoNave = "BUENO_RED"; // default
+        }
+        nave = NaveFactory.getInstance().crearNave(tipoNave, x, y);
         disparosActivos = new ArrayList<>();
         if (nave != null && nave.getCuerpo() != null) {
             nave.getCuerpo().dibujar(GameBoard.getGameBoard());
@@ -93,5 +97,9 @@ public class JugadorManager {
             // El movimiento del proyectil ahora disparará la lógica de colisiones en GameBoard
             d.mover(0, -1);
         }
+    }
+    
+    public void setTipoNave(String tipo) {
+        this.tipoNave = tipo;
     }
 }

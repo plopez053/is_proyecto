@@ -18,40 +18,48 @@ public class NaveFactory {
     }
 
     public Nave crearNave(String tipo, int x, int y) {
-        Nave myNave = null;
-        if (tipo.equalsIgnoreCase("Bueno")) {
-            Bueno bueno = new Bueno(x, y);
-            Composite cuerpo = new Composite();
-            
-            // Creamos una forma b√°sica (tipo cruz) para la nave buena
-            Pixel p1 = new Pixel(x, y, new casillaNave()); p1.setOwner(bueno);
-            Pixel p2 = new Pixel(x - 1, y, new casillaNave()); p2.setOwner(bueno);
-            Pixel p3 = new Pixel(x + 1, y, new casillaNave()); p3.setOwner(bueno);
-            Pixel p4 = new Pixel(x, y - 1, new casillaNave()); p4.setOwner(bueno);
-            
-            cuerpo.addComponente(p1);
-            cuerpo.addComponente(p2);
-            cuerpo.addComponente(p3);
-            cuerpo.addComponente(p4);
-            
-            bueno.setCuerpo(cuerpo);
-            bueno.setArmaActual(new DisparoPixelStrategy());
-            myNave = bueno;
-        } else if (tipo.equalsIgnoreCase("Malo")) {
-            Malo malo = new Malo(x, y);
-            Composite cuerpo = new Composite();
-            
-            // Un cuerpo de enemigo simple de 2 pixeles (por ejemplo)
-            Pixel p1 = new Pixel(x, y, new casillaEnemigo()); p1.setOwner(malo);
-            Pixel p2 = new Pixel(x + 1, y, new casillaEnemigo()); p2.setOwner(malo);
-            
-            cuerpo.addComponente(p1);
-            cuerpo.addComponente(p2);
-            
-            malo.setCuerpo(cuerpo);
-            myNave = malo;
-        }
+        switch (tipo.toUpperCase()) {
 
-        return myNave;
+        case "BUENO_RED":
+            return crearBueno(new Red(x,y), x, y);
+
+        case "BUENO_GREEN":
+            return crearBueno(new Green(x,y), x, y);
+
+        case "BUENO_BLUE":
+            return crearBueno(new Blue(x,y), x, y);
+
+        case "MALO":
+            return crearMalo(x, y);
+
+        default:
+            throw new IllegalArgumentException("Tipo no v·lido");
+        }
+    }
+    private Bueno crearBueno(Bueno nave, int x, int y) {
+    	Composite cuerpo = new Composite();
+
+        cuerpo.addComponente(new Pixel(x, y, new casillaNave()));
+        cuerpo.addComponente(new Pixel(x - 1, y, new casillaNave()));
+        cuerpo.addComponente(new Pixel(x + 1, y, new casillaNave()));
+        cuerpo.addComponente(new Pixel(x, y - 1, new casillaNave()));
+
+        nave.setCuerpo(cuerpo);
+        nave.setArmaActual(new DisparoPixelStrategy());
+
+        return nave;
+    }
+    
+    private Malo crearMalo(int x, int y) {
+
+        Malo enemigo = new Malo(x,y);
+        Composite cuerpo = new Composite();
+
+        cuerpo.addComponente(new Pixel(x, y, new casillaEnemigo()));
+        cuerpo.addComponente(new Pixel(x + 1, y, new casillaEnemigo()));
+
+        enemigo.setCuerpo(cuerpo);
+
+        return enemigo;
     }
 }

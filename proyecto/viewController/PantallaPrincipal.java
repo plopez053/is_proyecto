@@ -1,6 +1,7 @@
 package viewController;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.Graphics;
 import java.awt.Image;
@@ -24,6 +25,9 @@ public class PantallaPrincipal extends JFrame implements Observer {
 	private JPanel contentPane;
 	private JPanel panelLogo;
 	private JButton btnIniciar;
+	private JButton btnRed;
+	private JButton btnGreen;
+	private JButton btnBlue;
 	private Image backgroundImage;
 	private Image logoSI;
 	private Controlador controlador;
@@ -65,7 +69,24 @@ public class PantallaPrincipal extends JFrame implements Observer {
 		setContentPane(contentPane);
 		contentPane.setLayout(new BorderLayout(0, 0));
 		contentPane.add(getBtnIniciar(), BorderLayout.SOUTH);
-
+		JPanel panelSeleccion = new JPanel();
+        panelSeleccion.setOpaque(false);
+        btnRed = new JButton("Red");
+        btnGreen = new JButton("Green");
+        btnBlue = new JButton("Blue");
+        panelSeleccion.add(btnRed);
+        panelSeleccion.add(btnGreen);
+        panelSeleccion.add(btnBlue);
+        contentPane.add(panelSeleccion, BorderLayout.CENTER);
+        btnRed.setActionCommand("RED");
+        btnRed.setBackground(Color.red);
+        btnGreen.setActionCommand("GREEN");
+        btnGreen.setBackground(Color.green);
+        btnBlue.setActionCommand("BLUE");
+        btnBlue.setBackground(Color.BLUE);
+        btnRed.addActionListener(getControlador());
+        btnGreen.addActionListener(getControlador());
+        btnBlue.addActionListener(getControlador());
 	}
 
 	private Controlador getControlador() {
@@ -79,14 +100,36 @@ public class PantallaPrincipal extends JFrame implements Observer {
 		// Tras pulsar el botón, abrir la otra pantalla
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			GameBoard.getGameBoard().crearTablero();
+			
+			String comando = e.getActionCommand();
+			switch (comando) {
 
+            case "RED":
+            	GameBoard.getGameBoard().setTipoNave("BUENO_RED");
+                break;
+
+            case "GREEN":
+            	GameBoard.getGameBoard().setTipoNave("BUENO_GREEN");
+                break;
+
+            case "BLUE":
+            	GameBoard.getGameBoard().setTipoNave("BUENO_BLUE");
+                break;
+
+            case "INICIAR":
+            	if (GameBoard.getGameBoard().getTipoNave() == null) {
+					GameBoard.getGameBoard().setTipoNave("BUENO_RED");
+	            }
+				GameBoard.getGameBoard().crearTablero();
+                
+                break;
+			}
 		}
 	}
 
 	private JButton getBtnIniciar() {
 		if (btnIniciar == null) {
-			btnIniciar = new JButton("iniciar");
+			btnIniciar = new JButton("INICIAR");
 			btnIniciar.addActionListener(getControlador());
 
 		}
