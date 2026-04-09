@@ -1,5 +1,6 @@
 package Model;
 
+import java.util.ConcurrentModificationException;
 import java.util.Observable;
 
 public class GameBoard extends Observable {
@@ -33,34 +34,28 @@ public class GameBoard extends Observable {
     }
 
     public Pixel getPixel(int x, int y) {
-        if (esPosicionValida(x, y)) {
+        if (esPosicionValida(x, y))
             return matrix[y][x];
-        }
         return null;
     }
 
-    // Para compatibilidad con código de compañeros
     public Pixel getCasilla(int x, int y) {
         return getPixel(x, y);
     }
 
     public void setPixel(int x, int y, Pixel p) {
-        if (esPosicionValida(x, y)) {
+        if (esPosicionValida(x, y))
             matrix[y][x] = p;
-        }
     }
 
-    // Para compatibilidad con código de compañeros
     public void setCasilla(int x, int y, Pixel p) {
         setPixel(x, y, p);
     }
 
     public void clearBoard() {
-        for (int i = 0; i < height; i++) {
-            for (int j = 0; j < width; j++) {
+        for (int i = 0; i < height; i++)
+            for (int j = 0; j < width; j++)
                 matrix[i][j] = null;
-            }
-        }
     }
 
     public void crearTablero() {
@@ -69,9 +64,7 @@ public class GameBoard extends Observable {
         JugadorManager.getJugador().setTipoNave(tipoNave);
         JugadorManager.getInstance().inicializarJugador(posXInicio, posYInicio);
         EnemigoManager.getEnemigoManager().spawnEnemies();
-
         EnemigoManager.getEnemigoManager().iniciarTimerEnemigos();
-
         setChanged();
         notifyObservers(new Object[] { 1, getBoardActual() });
     }
@@ -95,16 +88,15 @@ public class GameBoard extends Observable {
                 } else if (p.esEnemigo()) {
                     snapshot[i][j] = 0;
                 } else if (p.esNave()) {
-                	String tipoN = getTipoNave();
-                	if("BUENO_RED".equals(tipoN)) {
-                		snapshot[i][j] = 1;
-                	}else if("BUENO_GREEN".equals(tipoN)) {
-                		snapshot[i][j] = 4;
-                	}else if ("BUENO_BLUE".equals(tipoN)) {
-                		snapshot[i][j] = 5;
-                	}else {
-                    snapshot[i][j] = 1; //caso default
-                	}
+                    String tipoN = getTipoNave();
+                    if ("BUENO_RED".equals(tipoN))
+                        snapshot[i][j] = 1;
+                    else if ("BUENO_GREEN".equals(tipoN))
+                        snapshot[i][j] = 4;
+                    else if ("BUENO_BLUE".equals(tipoN))
+                        snapshot[i][j] = 5;
+                    else
+                        snapshot[i][j] = 1;
                 } else {
                     snapshot[i][j] = 3;
                 }
@@ -113,38 +105,30 @@ public class GameBoard extends Observable {
         return snapshot;
     }
 
+    /**
+     * GameBoard actúa como DETECTOR de colisión.
+     * Retorna true si hay colisión → el Pixel movido debe invocar impactar().
+     * Llama a ocupante.impactar() (patrón State) para que el estado decida qué
+     * hace.
+     */
     public boolean gestionarColision(Pixel movido, Pixel ocupante) {
-        if (ocupante == null) return false;
+        // Sin ocupante o vacío → sin colisión
+        if (ocupante == null || !ocupante.estaOcupada())
+            return false;
 
-        // Caso 1: Enemigo choca con Disparo
-        if (movido.esEnemigo() && ocupante.esDisparo()) {
-            Object bullet = ocupante.getOwner();
-            if (bullet instanceof Disparo) {
-                JugadorManager.getInstance().eliminarDisparoActivo((Disparo) bullet);
-            }
-            EnemigoManager.getEnemigoManager().matarEnemigoEnCoordenada(movido.getX(), movido.getY());
-            return true;
-        }
-        
-        // Caso 2: Disparo choca con Enemigo
-        if (movido.esDisparo() && ocupante.esEnemigo()) {
-            EnemigoManager.getEnemigoManager().matarEnemigoEnCoordenada(ocupante.getX(), ocupante.getY());
-            if (movido.getOwner() instanceof Disparo) {
-                JugadorManager.getInstance().eliminarDisparoActivo((Disparo) movido.getOwner());
-            }
-            return true;
-        }
+        // Mismo dueño (hermanos de la misma nave) → sin colisión
+        if (movido.getOwner() != null && movido.getOwner() == ocupante.getOwner())
+            return false;
 
-        // Caso 3: Choque con Jugador (Game Over)
-        if ((movido.esEnemigo() && ocupante.esNave()) || 
-            (movido.esNave() && ocupante.esEnemigo())) {
-            Nave n = JugadorManager.getInstance().getNave();
-            if (n != null) n.removeNave();
-            evaluarEstadoJuego();
-            return true;
-        }
+        // Disparo vs Disparo → se ignoran mutuamente
+        if (movido.esDisparo() && ocupante.esDisparo())
+            return false;
 
-        return false;
+        // Colisión real: el estado del ocupante decide qué hacer (State pattern)
+        ocupante.impactar();
+
+        // Señalamos al 'movido' que también debe procesarse
+        return true;
     }
 
     public boolean esPosicionValida(int x, int y) {
@@ -153,9 +137,8 @@ public class GameBoard extends Observable {
 
     public void actualizarPosicion(int viejaX, int viejaY, Pixel p) {
         if (esPosicionValida(viejaX, viejaY)) {
-            if (matrix[viejaY][viejaX] == p) {
+            if (matrix[viejaY][viejaX] == p)
                 matrix[viejaY][viejaX] = null;
-            }
         }
         if (esPosicionValida(p.getX(), p.getY())) {
             matrix[p.getY()][p.getX()] = p;
@@ -174,24 +157,25 @@ public class GameBoard extends Observable {
 
     public void evaluarTickEnemigos() {
         Nave naveC = JugadorManager.getInstance().getNave();
-
         boolean fin = false;
-        for (Enemigo e : EnemigoManager.getEnemigoManager().getEnemigos()) {
-            if (e.getNave() != null) {
-                for (Pixel p : e.getNave().getPixelesOcupados()) {
-                    if (p.getY() >= height - 1) {
-                        fin = true;
-                        break;
+        try {
+            for (Enemigo e : EnemigoManager.getEnemigoManager().getEnemigos()) {
+                if (e.getNave() != null) {
+                    for (Pixel p : e.getNave().getPixelesOcupados()) {
+                        if (p.getY() >= height - 1) {
+                            fin = true;
+                            break;
+                        }
                     }
                 }
+                if (fin)
+                    break;
             }
-            if (fin)
-                break;
+        } catch (ConcurrentModificationException e) {
         }
 
-        if (naveC != null && !naveC.estaViva()) {
+        if (naveC != null && !naveC.estaViva())
             fin = true;
-        }
 
         if (fin) {
             juegoFinalizado = true;
@@ -202,13 +186,12 @@ public class GameBoard extends Observable {
             actualizarTablero();
         }
     }
-    
+
     public void setTipoNave(String tipo) {
         this.tipoNave = tipo;
     }
 
-	public String getTipoNave() {
-		
-		return this.tipoNave;
-	}
+    public String getTipoNave() {
+        return this.tipoNave;
+    }
 }

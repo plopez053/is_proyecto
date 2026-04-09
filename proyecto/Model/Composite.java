@@ -54,6 +54,19 @@ public class Composite implements Entidad {
         for (Entidad ev : copia) {
             if (ev != null) {
                 ev.mover(dx, dy);
+                
+                // Si tras mover este píxel el dueño (Nave o Disparo) ha muerto, 
+                // abortamos inmediatamente para no dejar píxeles fantasma.
+                if (ev instanceof Pixel) {
+                    Pixel p = (Pixel) ev;
+                    Destructible owner = p.getOwner();
+                    
+                    if (owner instanceof Nave) {
+                        if (!((Nave) owner).estaViva()) break;
+                    } else if (owner instanceof Disparo) {
+                        if (!((Disparo) owner).estaVivo()) break;
+                    }
+                }
             }
         }
     }
@@ -68,5 +81,14 @@ public class Composite implements Entidad {
             }
         }
         return ocupadas;
+    }
+
+    @Override
+    public void procesarDestruccion() {
+        for (Entidad ev : new ArrayList<>(componentes)) {
+            if (ev != null) {
+                ev.procesarDestruccion();
+            }
+        }
     }
 }

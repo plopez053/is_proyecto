@@ -1,9 +1,13 @@
 package Model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class NaveFactory {
     private static NaveFactory instance;
 
-    private NaveFactory() {}
+    private NaveFactory() {
+    }
 
     public static NaveFactory getInstance() {
         if (instance == null) {
@@ -12,54 +16,89 @@ public class NaveFactory {
         return instance;
     }
 
-    // Para compatibilidad con código de compañeros
     public static NaveFactory getNaveFactory() {
         return getInstance();
     }
 
     public Nave crearNave(String tipo, int x, int y) {
         switch (tipo.toUpperCase()) {
-
-        case "BUENO_RED":
-            return crearBueno(new Red(x,y), x, y);
-
-        case "BUENO_GREEN":
-            return crearBueno(new Green(x,y), x, y);
-
-        case "BUENO_BLUE":
-            return crearBueno(new Blue(x,y), x, y);
-
-        case "MALO":
-            return crearMalo(x, y);
-
-        default:
-            throw new IllegalArgumentException("Tipo no v�lido");
+            case "BUENO_RED":
+                return crearBuenoRed(new Red(x, y), x, y);
+            case "BUENO_GREEN":
+                return crearBuenoGreen(new Green(x, y), x, y);
+            case "BUENO_BLUE":
+                return crearBuenoBlue(new Blue(x, y), x, y);
+            case "MALO":
+                return crearMalo(x, y);
+            default:
+                throw new IllegalArgumentException("Tipo no valido");
         }
     }
-    private Bueno crearBueno(Bueno nave, int x, int y) {
-    	Composite cuerpo = new Composite();
 
-        cuerpo.addComponente(new Pixel(x, y, new casillaNave()));
-        cuerpo.addComponente(new Pixel(x - 1, y, new casillaNave()));
-        cuerpo.addComponente(new Pixel(x + 1, y, new casillaNave()));
-        cuerpo.addComponente(new Pixel(x, y - 1, new casillaNave()));
+    private void addPixel(Composite c, Pixel p, Destructible owner) {
+        p.setOwner(owner);
+        c.addComponente(p);
+    }
+
+    private Bueno crearBuenoRed(Bueno nave, int x, int y) {
+        Composite cuerpo = new Composite();
+        addPixel(cuerpo, new Pixel(x, y, new casillaNave()), nave);
+        addPixel(cuerpo, new Pixel(x - 1, y, new casillaNave()), nave);
+        addPixel(cuerpo, new Pixel(x + 1, y, new casillaNave()), nave);
+        addPixel(cuerpo, new Pixel(x, y - 1, new casillaNave()), nave);
 
         nave.setCuerpo(cuerpo);
-        nave.setArmaActual(new DisparoPixelStrategy());
-
+        List<EstrategiaDisparo> armas = new ArrayList<>();
+        armas.add(new DisparoPixelStrategy());
+        armas.add(new Flecha());
+        armas.add(new Rombo());
+        nave.setArmasDisponibles(armas);
         return nave;
     }
-    
-    private Malo crearMalo(int x, int y) {
 
-        Malo enemigo = new Malo(x,y);
+    private Bueno crearBuenoGreen(Bueno nave, int x, int y) {
         Composite cuerpo = new Composite();
+        addPixel(cuerpo, new Pixel(x, y, new casillaNave()), nave);
+        addPixel(cuerpo, new Pixel(x - 1, y, new casillaNave()), nave);
+        addPixel(cuerpo, new Pixel(x + 1, y, new casillaNave()), nave);
+        addPixel(cuerpo, new Pixel(x - 1, y - 1, new casillaNave()), nave);
+        addPixel(cuerpo, new Pixel(x, y - 1, new casillaNave()), nave);
+        addPixel(cuerpo, new Pixel(x + 1, y - 1, new casillaNave()), nave);
 
-        cuerpo.addComponente(new Pixel(x, y, new casillaEnemigo()));
-        cuerpo.addComponente(new Pixel(x + 1, y, new casillaEnemigo()));
+        nave.setCuerpo(cuerpo);
+        List<EstrategiaDisparo> armas = new ArrayList<>();
+        armas.add(new DisparoPixelStrategy());
+        armas.add(new Flecha());
+        nave.setArmasDisponibles(armas);
+        return nave;
+    }
+
+    private Bueno crearBuenoBlue(Bueno nave, int x, int y) {
+        Composite cuerpo = new Composite();
+        addPixel(cuerpo, new Pixel(x, y, new casillaNave()), nave);
+        addPixel(cuerpo, new Pixel(x - 1, y, new casillaNave()), nave);
+        addPixel(cuerpo, new Pixel(x + 1, y, new casillaNave()), nave);
+        addPixel(cuerpo, new Pixel(x - 1, y - 1, new casillaNave()), nave);
+        addPixel(cuerpo, new Pixel(x + 1, y - 1, new casillaNave()), nave);
+
+        nave.setCuerpo(cuerpo);
+        List<EstrategiaDisparo> armas = new ArrayList<>();
+        armas.add(new DisparoPixelStrategy());
+        armas.add(new Rombo());
+        nave.setArmasDisponibles(armas);
+        return nave;
+    }
+
+    private Malo crearMalo(int x, int y) {
+        Malo enemigo = new Malo(x, y);
+        Composite cuerpo = new Composite();
+        addPixel(cuerpo, new Pixel(x, y, new casillaEnemigo()), enemigo);
+        addPixel(cuerpo, new Pixel(x + 1, y, new casillaEnemigo()), enemigo);
+        addPixel(cuerpo, new Pixel(x - 1, y, new casillaEnemigo()), enemigo);
+        addPixel(cuerpo, new Pixel(x - 1, y + 1, new casillaEnemigo()), enemigo);
+        addPixel(cuerpo, new Pixel(x + 1, y + 1, new casillaEnemigo()), enemigo);
 
         enemigo.setCuerpo(cuerpo);
-
         return enemigo;
     }
 }

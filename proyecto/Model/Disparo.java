@@ -1,38 +1,55 @@
 package Model;
 
-public class Disparo {
+import java.util.Collections;
+import java.util.List;
+
+public class Disparo implements Destructible {
     private Composite cuerpo;
+    private boolean destruido = false;
 
     public Disparo(int x, int y) {
         this.cuerpo = new Composite();
         Pixel p = new Pixel(x, y, new casillaDisparo());
         p.setOwner(this);
-        this.cuerpo.addComponente(p); // Proyectil
+        this.cuerpo.addComponente(p);
+    }
+
+    public Disparo(int x, int y, int[][] desplazamientos) {
+        this.cuerpo = new Composite();
+        for (int[] dRelativo : desplazamientos) {
+            Pixel p = new Pixel(x + dRelativo[0], y + dRelativo[1], new casillaDisparo());
+            p.setOwner(this);
+            this.cuerpo.addComponente(p);
+        }
     }
 
     public int getX() {
-        if (cuerpo != null && !cuerpo.getPixelesOcupados().isEmpty()) {
-            return cuerpo.getPixelesOcupados().get(0).getX();
+        List<Pixel> pixeles = getPixelesOcupados();
+        if (!pixeles.isEmpty()) {
+            return pixeles.get(0).getX();
         }
         return -1;
     }
 
     public int getY() {
-        if (cuerpo != null && !cuerpo.getPixelesOcupados().isEmpty()) {
-            return cuerpo.getPixelesOcupados().get(0).getY();
+        List<Pixel> pixeles = getPixelesOcupados();
+        if (!pixeles.isEmpty()) {
+            return pixeles.get(0).getY();
         }
         return -1;
     }
 
     public void mover(int dx, int dy) {
-        if (!canMove(dx, dy)) {
-            JugadorManager.getInstance().eliminarDisparoActivo(this);
+        if (destruido) return;
+        
+        if (cuerpo != null && !cuerpo.canMove(dx, dy)) {
+            procesarDestruccion();
             return;
         }
 
-        // El movimiento del cuerpo invocará Pixel.mover(), 
-        // el cual delegará la colisión al GameBoard.
-        cuerpo.mover(dx, dy);
+        if (cuerpo != null) {
+            cuerpo.mover(dx, dy);
+        }
     }
 
     public void dibujar(GameBoard gb) {
@@ -52,6 +69,25 @@ public class Disparo {
             return cuerpo.canMove(dx, dy);
         }
         return false;
+    }
+
+    public List<Pixel> getPixelesOcupados() {
+        if (cuerpo != null) {
+            return cuerpo.getPixelesOcupados();
+        }
+        return Collections.emptyList();
+    }
+
+    public boolean estaVivo() {
+        return !destruido;
+    }
+
+    @Override
+    public void procesarDestruccion() {
+        if (!destruido) {
+            destruido = true;
+            JugadorManager.getInstance().eliminarDisparoActivo(this);
+        }
     }
 
     public Composite getCuerpo() {

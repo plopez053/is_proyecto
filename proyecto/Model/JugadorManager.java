@@ -29,7 +29,7 @@ public class JugadorManager {
     }
 
     public void inicializarJugador(int x, int y) {
-    	if (tipoNave == null) {
+        if (tipoNave == null) {
             tipoNave = "BUENO_RED"; // default
         }
         nave = NaveFactory.getInstance().crearNave(tipoNave, x, y);
@@ -94,12 +94,19 @@ public class JugadorManager {
     private void moverDisparos() {
         List<Disparo> copia = new ArrayList<>(disparosActivos);
         for (Disparo d : copia) {
-            // El movimiento del proyectil ahora disparará la lógica de colisiones en GameBoard
+            // El movimiento del proyectil ahora disparará la lógica de colisiones en
+            // GameBoard
             d.mover(0, -1);
         }
     }
-    
+
     public void setTipoNave(String tipo) {
         this.tipoNave = tipo;
+    }
+
+    public void cambiarArma() {
+        if (nave instanceof Bueno && nave.estaViva()) {
+            ((Bueno) nave).cambiarArma();
+        }
     }
 }

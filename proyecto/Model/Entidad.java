@@ -12,7 +12,9 @@ public interface Entidad {
     void borrar(GameBoard gb);
 
     List<Pixel> getPixelesOcupados();
-    
+
+    void procesarDestruccion();
+
     // Alias para compatibilidad
     default List<Pixel> getCasillasOcupadas() {
         return getPixelesOcupados();

@@ -3,11 +3,16 @@ package Model;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * CONTEXTO del patrón State.
+ * Equivale a Square en minesWeeper o Vending en vending.
+ * Tiene changeState() y delega las acciones al estado actual.
+ */
 public class Pixel implements Entidad {
     protected int x;
     protected int y;
     protected EstadoCasilla estado;
-    private Object owner;
+    private Destructible owner;
 
     public Pixel(int x, int y, EstadoCasilla estado) {
         this.x = x;
@@ -15,29 +20,39 @@ public class Pixel implements Entidad {
         this.estado = estado;
     }
 
-    public Object getOwner() { return owner; }
-    public void setOwner(Object owner) { this.owner = owner; }
+    public Destructible getOwner() {
+        return owner;
+    }
+
+    public void setOwner(Destructible owner) {
+        this.owner = owner;
+    }
 
     public int getX() { return x; }
     public void setX(int x) { this.x = x; }
     public int getY() { return y; }
     public void setY(int y) { this.y = y; }
 
-    public EstadoCasilla getEstado() {
-        return estado;
+    public EstadoCasilla getEstado() { return estado; }
+    public void setEstado(EstadoCasilla estado) { this.estado = estado; }
+
+    /**
+     * changeState: el núcleo del patrón State.
+     */
+    public void changeState(EstadoCasilla nuevoEstado) {
+        this.estado = nuevoEstado;
     }
 
-    public void setEstado(EstadoCasilla estado) {
-        this.estado = estado;
+    /**
+     * impactar: delega al estado actual (patrón State puro).
+     */
+    public void impactar() {
+        this.estado.impactar(this);
     }
 
-    public void cambiarEstado(EstadoCasilla pEstado) {
-        this.estado = pEstado;
-    }
-
-    public boolean esEnemigo() { return estado.esEnemigo(); }
-    public boolean esNave() { return estado.esNave(); }
-    public boolean esDisparo() { return estado.esDisparo(); }
+    public boolean esEnemigo()   { return estado.esEnemigo(); }
+    public boolean esNave()      { return estado.esNave(); }
+    public boolean esDisparo()   { return estado.esDisparo(); }
     public boolean estaOcupada() { return estado.estaOcupada(); }
 
     @Override
@@ -47,15 +62,17 @@ public class Pixel implements Entidad {
 
     @Override
     public void dibujar(GameBoard gb) {
-        synchronized(gb) {
+        synchronized (gb) {
             gb.setPixel(x, y, this);
         }
     }
 
     @Override
     public void borrar(GameBoard gb) {
-        synchronized(gb) {
-            gb.setPixel(x, y, null);
+        synchronized (gb) {
+            if (gb.getPixel(x, y) == this) {
+                gb.setPixel(x, y, null);
+            }
         }
     }
 
@@ -67,10 +84,16 @@ public class Pixel implements Entidad {
         int newY = oldY + dy;
 
         GameBoard board = GameBoard.getGameBoard();
+
+        if (!board.esPosicionValida(newX, newY)) return;
+
         Pixel ocupante = board.getPixel(newX, newY);
-        
-        // Delegamos la colisión al GameBoard
+
         if (board.gestionarColision(this, ocupante)) {
+            // El Pixel delega en el estado para lógica de negocio (avisar owner, cambiar estado)
+            this.impactar();
+            // El PÍXEL (Contexto) se encarga de la limpieza física del tablero
+            this.borrar(board);
             return;
         }
 
@@ -84,8 +107,14 @@ public class Pixel implements Entidad {
     public List<Pixel> getPixelesOcupados() {
         return Collections.singletonList(this);
     }
-    
-    // Método para compatibilidad con código de compañeros que use getCasillasOcupadas
+
+    @Override
+    public void procesarDestruccion() {
+        // Delegamos al estado actual y nos borramos
+        this.impactar();
+        this.borrar(GameBoard.getGameBoard());
+    }
+
     public List<Pixel> getCasillasOcupadas() {
         return getPixelesOcupados();
     }

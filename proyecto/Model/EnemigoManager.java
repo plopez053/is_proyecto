@@ -8,7 +8,7 @@ import java.util.TimerTask;
 
 public class EnemigoManager {
     private static EnemigoManager miEnemigoManager;
-    private List<Enemigo> enemigos; 
+    private List<Enemigo> enemigos;
     private Random random;
     private Timer timerEnemigos;
 
@@ -62,18 +62,21 @@ public class EnemigoManager {
                 if (p != null && (p.esEnemigo() || p.esNave() || p.esDisparo())) {
                     positionInvalid = true;
                 }
-                
-                // Chequeo de proximidad con otros enemigos (lógica de compañeros)
+
+                // Chequeo de proximidad con otros enemigos (lógica de compañeros mejorada)
                 for (Enemigo e : enemigos) {
                     if (e.getNave().getCuerpo() != null) {
                         for (Pixel ep : e.getNave().getPixelesOcupados()) {
-                            if (Math.abs(ep.getX() - x) <= 1 && Math.abs(ep.getY() - y) <= 1) {
+                            // Si estamos a menos de 6 de distancia en X o 3 en Y de CUALQUIER píxel de otro
+                            // enemigo
+                            if (Math.abs(ep.getX() - x) < 6 && Math.abs(ep.getY() - y) < 4) {
                                 positionInvalid = true;
                                 break;
                             }
                         }
                     }
-                    if (positionInvalid) break;
+                    if (positionInvalid)
+                        break;
                 }
             } while (positionInvalid);
 

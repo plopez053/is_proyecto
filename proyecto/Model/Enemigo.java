@@ -1,8 +1,9 @@
 package Model;
+
 import java.util.Collections;
 import java.util.List;
 
-public class Enemigo {
+public class Enemigo implements Destructible {
     private Malo miNave;
 
     public Enemigo(Malo nave) {
@@ -22,5 +23,11 @@ public class Enemigo {
     public List<Pixel> getPixelesOcupados() {
         return miNave != null ? miNave.getPixelesOcupados() : Collections.emptyList();
     }
-}
 
+    @Override
+    public void procesarDestruccion() {
+        if (miNave != null) {
+            miNave.procesarDestruccion();
+        }
+    }
+}
