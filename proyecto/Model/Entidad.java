@@ -7,13 +7,13 @@ public interface Entidad {
 
     boolean canMove(int dx, int dy);
 
-    void dibujar(GameBoard gb);
+    void asignar();
 
-    void borrar(GameBoard gb);
+    void borrar();
 
     List<Pixel> getPixelesOcupados();
 
-    void procesarDestruccion();
+
 
     // Alias para compatibilidad
     default List<Pixel> getCasillasOcupadas() {

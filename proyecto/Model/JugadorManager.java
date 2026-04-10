@@ -1,11 +1,13 @@
 package Model;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Observable;
+import java.util.Observer;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.ArrayList;
 
-public class JugadorManager {
+public class JugadorManager implements Observer {
     private static JugadorManager instance;
     private Nave nave;
     private List<Disparo> disparosActivos;
@@ -35,7 +37,7 @@ public class JugadorManager {
         nave = NaveFactory.getInstance().crearNave(tipoNave, x, y);
         disparosActivos = new ArrayList<>();
         if (nave != null && nave.getCuerpo() != null) {
-            nave.getCuerpo().dibujar(GameBoard.getGameBoard());
+            nave.getCuerpo().asignar();
         }
         iniciarTimerDisparos();
     }
@@ -51,9 +53,21 @@ public class JugadorManager {
     public void moverNave(int dx, int dy) {
         if (nave != null && nave.estaViva()) {
             nave.mover(dx, dy);
-            if (!nave.estaViva()) {
-                GameBoard.getGameBoard().evaluarEstadoJuego();
+            evaluarEstadoJuego();
+        }
+    }
+
+    public void evaluarEstadoJuego() {
+        // La lógica de fin de juego se gestiona ahora de forma reactiva en GameBoard
+    }
+
+    public void notificarDestruccionNave() {
+        if (nave != null && nave.estaViva()) {
+            nave.removeNave();
+            if (nave.getCuerpo() != null) {
+                nave.getCuerpo().borrar();
             }
+            // El fin de juego se gestiona en GameBoard tras la colisión
         }
     }
 
@@ -63,7 +77,7 @@ public class JugadorManager {
             if (nuevosDisparos != null) {
                 disparosActivos.addAll(nuevosDisparos);
                 for (Disparo d : nuevosDisparos) {
-                    d.dibujar(GameBoard.getGameBoard());
+                    d.asignar();
                 }
             }
         }
@@ -72,7 +86,8 @@ public class JugadorManager {
     public void eliminarDisparoActivo(Disparo d) {
         if (disparosActivos != null && disparosActivos.contains(d)) {
             disparosActivos.remove(d);
-            d.borrar(GameBoard.getGameBoard());
+            d.markAsDestroyed();
+            d.borrar();
         }
     }
 
@@ -107,6 +122,22 @@ public class JugadorManager {
     public void cambiarArma() {
         if (nave instanceof Bueno && nave.estaViva()) {
             ((Bueno) nave).cambiarArma();
+        }
+    }
+
+    @Override
+    public void update(Observable o, Object arg) {
+        if (arg instanceof Pixel) {
+            Pixel p = (Pixel) arg;
+            Composite parent = p.getParentComposite();
+            Object owner = (parent != null) ? parent.getOwner() : null;
+            if (owner instanceof Disparo) {
+                eliminarDisparoActivo((Disparo) owner);
+            } else if (owner instanceof Nave) {
+                if (nave != null && nave == owner) {
+                    notificarDestruccionNave();
+                }
+            }
         }
     }
 }

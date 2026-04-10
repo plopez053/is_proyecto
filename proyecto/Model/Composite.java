@@ -5,13 +5,25 @@ import java.util.List;
 
 public class Composite implements Entidad {
     private List<Entidad> componentes = new ArrayList<>();
+    private Object owner;
 
     public void addComponente(Entidad ev) {
         componentes.add(ev);
+        if (ev instanceof Pixel) {
+            ((Pixel) ev).setParentComposite(this);
+        }
     }
 
     public void removeComponente(Entidad ev) {
         componentes.remove(ev);
+    }
+
+    public void setOwner(Object owner) {
+        this.owner = owner;
+    }
+
+    public Object getOwner() {
+        return owner;
     }
 
     public List<Entidad> getComponentes() {
@@ -29,22 +41,19 @@ public class Composite implements Entidad {
     }
 
     @Override
-    public void dibujar(GameBoard gb) {
-        synchronized (gb) {
-            for (Entidad ev : componentes) {
-                if (ev != null)
-                    ev.dibujar(gb);
-            }
+    public void asignar() {
+
+        for (Entidad ev : componentes) {
+            if (ev != null)
+                ev.asignar();
         }
     }
 
     @Override
-    public void borrar(GameBoard gb) {
-        synchronized (gb) {
-            for (Entidad ev : componentes) {
-                if (ev != null)
-                    ev.borrar(gb);
-            }
+    public void borrar() {
+        for (Entidad ev : componentes) {
+            if (ev != null)
+                ev.borrar();
         }
     }
 
@@ -54,17 +63,20 @@ public class Composite implements Entidad {
         for (Entidad ev : copia) {
             if (ev != null) {
                 ev.mover(dx, dy);
-                
-                // Si tras mover este píxel el dueño (Nave o Disparo) ha muerto, 
+
+                // Si tras mover este píxel el dueño (Nave o Disparo) ha muerto,
                 // abortamos inmediatamente para no dejar píxeles fantasma.
                 if (ev instanceof Pixel) {
                     Pixel p = (Pixel) ev;
-                    Destructible owner = p.getOwner();
-                    
+                    Composite parent = p.getParentComposite();
+                    Object owner = (parent != null) ? parent.getOwner() : null;
+
                     if (owner instanceof Nave) {
-                        if (!((Nave) owner).estaViva()) break;
+                        if (!((Nave) owner).estaViva())
+                            break;
                     } else if (owner instanceof Disparo) {
-                        if (!((Disparo) owner).estaVivo()) break;
+                        if (!((Disparo) owner).estaVivo())
+                            break;
                     }
                 }
             }
@@ -83,12 +95,4 @@ public class Composite implements Entidad {
         return ocupadas;
     }
 
-    @Override
-    public void procesarDestruccion() {
-        for (Entidad ev : new ArrayList<>(componentes)) {
-            if (ev != null) {
-                ev.procesarDestruccion();
-            }
-        }
-    }
 }

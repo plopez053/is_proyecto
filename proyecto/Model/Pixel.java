@@ -2,17 +2,20 @@ package Model;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Observable;
 
 /**
  * CONTEXTO del patrón State.
  * Equivale a Square en minesWeeper o Vending en vending.
  * Tiene changeState() y delega las acciones al estado actual.
  */
-public class Pixel implements Entidad {
+public class Pixel extends Observable implements Entidad {
     protected int x;
     protected int y;
     protected EstadoCasilla estado;
-    private Destructible owner;
+    // La referencia al propietario se gestiona ahora en la `Composite` que contiene
+    // este píxel. Aquí mantenemos un puntero al `Composite` padre.
+    private Composite parentComposite;
 
     public Pixel(int x, int y, EstadoCasilla estado) {
         this.x = x;
@@ -20,21 +23,37 @@ public class Pixel implements Entidad {
         this.estado = estado;
     }
 
-    public Destructible getOwner() {
-        return owner;
+    public Composite getParentComposite() {
+        return parentComposite;
     }
 
-    public void setOwner(Destructible owner) {
-        this.owner = owner;
+    public void setParentComposite(Composite parentComposite) {
+        this.parentComposite = parentComposite;
     }
 
-    public int getX() { return x; }
-    public void setX(int x) { this.x = x; }
-    public int getY() { return y; }
-    public void setY(int y) { this.y = y; }
+    public int getX() {
+        return x;
+    }
 
-    public EstadoCasilla getEstado() { return estado; }
-    public void setEstado(EstadoCasilla estado) { this.estado = estado; }
+    public void setX(int x) {
+        this.x = x;
+    }
+
+    public int getY() {
+        return y;
+    }
+
+    public void setY(int y) {
+        this.y = y;
+    }
+
+    public EstadoCasilla getEstado() {
+        return estado;
+    }
+
+    public void setEstado(EstadoCasilla estado) {
+        this.estado = estado;
+    }
 
     /**
      * changeState: el núcleo del patrón State.
@@ -50,10 +69,8 @@ public class Pixel implements Entidad {
         this.estado.impactar(this);
     }
 
-    public boolean esEnemigo()   { return estado.esEnemigo(); }
-    public boolean esNave()      { return estado.esNave(); }
-    public boolean esDisparo()   { return estado.esDisparo(); }
-    public boolean estaOcupada() { return estado.estaOcupada(); }
+    // Métodos de conveniencia eliminados a favor del uso directo de getEstado().getTipo()
+    // o delegación comportamental (impactar).
 
     @Override
     public boolean canMove(int dx, int dy) {
@@ -61,14 +78,16 @@ public class Pixel implements Entidad {
     }
 
     @Override
-    public void dibujar(GameBoard gb) {
+    public void asignar() {
+        GameBoard gb = GameBoard.getGameBoard();
         synchronized (gb) {
             gb.setPixel(x, y, this);
         }
     }
 
     @Override
-    public void borrar(GameBoard gb) {
+    public void borrar() {
+        GameBoard gb = GameBoard.getGameBoard();
         synchronized (gb) {
             if (gb.getPixel(x, y) == this) {
                 gb.setPixel(x, y, null);
@@ -85,15 +104,14 @@ public class Pixel implements Entidad {
 
         GameBoard board = GameBoard.getGameBoard();
 
-        if (!board.esPosicionValida(newX, newY)) return;
+        if (!board.esPosicionValida(newX, newY))
+            return;
 
         Pixel ocupante = board.getPixel(newX, newY);
 
         if (board.gestionarColision(this, ocupante)) {
-            // El Pixel delega en el estado para lógica de negocio (avisar owner, cambiar estado)
-            this.impactar();
-            // El PÍXEL (Contexto) se encarga de la limpieza física del tablero
-            this.borrar(board);
+            // El PÍXEL se encarga de su destrucción y avisar al manager (dependencia USE)
+            this.procesarDestruccion();
             return;
         }
 
@@ -108,14 +126,17 @@ public class Pixel implements Entidad {
         return Collections.singletonList(this);
     }
 
-    @Override
     public void procesarDestruccion() {
-        // Delegamos al estado actual y nos borramos
-        this.impactar();
-        this.borrar(GameBoard.getGameBoard());
+        // Delegar la orquestación de la destrucción a GameBoard.
+        // GameBoard ejecutará el impacto, permitirá que los managers borren
+        // componentes y al final actualizará la vista.
+        GameBoard.getGameBoard().procesarDestruccionDesdePixel(this);
     }
 
-    public List<Pixel> getCasillasOcupadas() {
-        return getPixelesOcupados();
+    public void notificarDestruccion() {
+        // Notificar a los observers registrados en ESTE píxel (managers).
+        setChanged();
+        notifyObservers(this);
     }
+
 }

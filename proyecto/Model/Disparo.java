@@ -3,24 +3,30 @@ package Model;
 import java.util.Collections;
 import java.util.List;
 
-public class Disparo implements Destructible {
+public class Disparo {
     private Composite cuerpo;
     private boolean destruido = false;
+    
+    public void markAsDestroyed() {
+        this.destruido = true;
+    }
 
     public Disparo(int x, int y) {
         this.cuerpo = new Composite();
         Pixel p = new Pixel(x, y, new casillaDisparo());
-        p.setOwner(this);
+        p.addObserver(JugadorManager.getInstance());
         this.cuerpo.addComponente(p);
+        this.cuerpo.setOwner(this);
     }
 
     public Disparo(int x, int y, int[][] desplazamientos) {
         this.cuerpo = new Composite();
         for (int[] dRelativo : desplazamientos) {
             Pixel p = new Pixel(x + dRelativo[0], y + dRelativo[1], new casillaDisparo());
-            p.setOwner(this);
+            p.addObserver(JugadorManager.getInstance());
             this.cuerpo.addComponente(p);
         }
+        this.cuerpo.setOwner(this);
     }
 
     public int getX() {
@@ -43,7 +49,8 @@ public class Disparo implements Destructible {
         if (destruido) return;
         
         if (cuerpo != null && !cuerpo.canMove(dx, dy)) {
-            procesarDestruccion();
+            destruido = true;
+            JugadorManager.getInstance().eliminarDisparoActivo(this);
             return;
         }
 
@@ -52,15 +59,15 @@ public class Disparo implements Destructible {
         }
     }
 
-    public void dibujar(GameBoard gb) {
+    public void asignar() {
         if (cuerpo != null) {
-            cuerpo.dibujar(gb);
+            cuerpo.asignar();
         }
     }
 
-    public void borrar(GameBoard gb) {
+    public void borrar() {
         if (cuerpo != null) {
-            cuerpo.borrar(gb);
+            cuerpo.borrar();
         }
     }
 
@@ -82,15 +89,11 @@ public class Disparo implements Destructible {
         return !destruido;
     }
 
-    @Override
-    public void procesarDestruccion() {
-        if (!destruido) {
-            destruido = true;
-            JugadorManager.getInstance().eliminarDisparoActivo(this);
-        }
-    }
-
     public Composite getCuerpo() {
         return cuerpo;
+    }
+
+    public void notificarDestruccion() {
+        JugadorManager.getInstance().eliminarDisparoActivo(this);
     }
 }

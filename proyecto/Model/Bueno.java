@@ -53,11 +53,7 @@ public class Bueno extends Nave {
         return null;
     }
 
-    @Override
-    public void procesarDestruccion() {
-        if (estaViva()) {
-            removeNave();
-            GameBoard.getGameBoard().evaluarEstadoJuego();
-        }
+    public void notificarDestruccion() {
+        JugadorManager.getInstance().notificarDestruccionNave();
     }
 }

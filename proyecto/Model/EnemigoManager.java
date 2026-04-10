@@ -2,11 +2,13 @@ package Model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Observable;
+import java.util.Observer;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class EnemigoManager {
+public class EnemigoManager implements Observer {
     private static EnemigoManager miEnemigoManager;
     private List<Enemigo> enemigos;
     private Random random;
@@ -30,7 +32,6 @@ public class EnemigoManager {
             @Override
             public void run() {
                 moveEnemies();
-                GameBoard.getGameBoard().evaluarTickEnemigos();
             }
         };
         timerEnemigos = new Timer();
@@ -59,7 +60,7 @@ public class EnemigoManager {
 
                 // Comprobamos si la casilla central de spawn ya tiene algo
                 Pixel p = board.getPixel(x, y);
-                if (p != null && (p.esEnemigo() || p.esNave() || p.esDisparo())) {
+                if (p != null && p.getEstado().getTipo() != EstadoCasilla.TipoCasilla.VACIA) {
                     positionInvalid = true;
                 }
 
@@ -85,7 +86,7 @@ public class EnemigoManager {
                 Enemigo nuevoEnemigo = new Enemigo(nuevaNave);
                 enemigos.add(nuevoEnemigo);
                 if (nuevaNave.getCuerpo() != null) {
-                    nuevaNave.getCuerpo().dibujar(board);
+                    nuevaNave.getCuerpo().asignar();
                 }
             }
         }
@@ -94,7 +95,7 @@ public class EnemigoManager {
     public Enemigo getEnemigoEn(int x, int y) {
         GameBoard board = GameBoard.getGameBoard();
         Pixel p = board.getPixel(x, y);
-        if (p != null && p.esEnemigo()) {
+        if (p != null && p.getEstado().getTipo() == EstadoCasilla.TipoCasilla.ENEMIGO) {
             for (Enemigo e : enemigos) {
                 if (e.getNave().getPixelesOcupados().contains(p)) {
                     return e;
@@ -117,18 +118,23 @@ public class EnemigoManager {
         }
     }
 
-    private List<Enemigo> enemigosAEliminar = new ArrayList<>();
+    public void notificarDestruccionNave(Malo nave) {
+        Enemigo aEliminar = null;
+        for (Enemigo e : enemigos) {
+            if (e.getNave() == nave) {
+                aEliminar = e;
+                break;
+            }
+        }
+        if (aEliminar != null) {
+            removeEnemigo(aEliminar);
+        }
+    }
 
     public void moveEnemies() {
         List<Enemigo> copia = new ArrayList<>(enemigos);
         for (Enemigo e : copia) {
-            if (!enemigosAEliminar.contains(e)) {
-                e.mover(0, 1);
-            }
-        }
-        if (!enemigosAEliminar.isEmpty()) {
-            enemigos.removeAll(enemigosAEliminar);
-            enemigosAEliminar.clear();
+            e.mover(0, 1);
         }
     }
 
@@ -144,13 +150,23 @@ public class EnemigoManager {
     }
 
     public void removeEnemigo(Enemigo e) {
-        if (!enemigosAEliminar.contains(e)) {
-            enemigosAEliminar.add(e);
-        }
+        enemigos.remove(e);
         if (e.getNave() != null) {
             e.getNave().removeNave();
             if (e.getNave().getCuerpo() != null) {
-                e.getNave().getCuerpo().borrar(GameBoard.getGameBoard());
+                e.getNave().getCuerpo().borrar();
+            }
+        }
+    }
+
+    @Override
+    public void update(Observable o, Object arg) {
+        if (arg instanceof Pixel) {
+            Pixel p = (Pixel) arg;
+            Composite parent = p.getParentComposite();
+            Object owner = (parent != null) ? parent.getOwner() : null;
+            if (owner instanceof Malo) {
+                notificarDestruccionNave((Malo) owner);
             }
         }
     }

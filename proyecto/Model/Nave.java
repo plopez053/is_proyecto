@@ -3,7 +3,7 @@ package Model;
 import java.util.Collections;
 import java.util.List;
 
-public abstract class Nave implements Destructible {
+public abstract class Nave {
     protected boolean viva = true;
     protected Composite cuerpo;
 
@@ -56,10 +56,6 @@ public abstract class Nave implements Destructible {
         return Collections.emptyList();
     }
 
-    // Alias para compatibilidad con código de compañeros
-    public List<Pixel> getCasillasOcupadas() {
-        return getPixelesOcupados();
-    }
 
     public void removeNave() {
         viva = false;
@@ -73,6 +69,4 @@ public abstract class Nave implements Destructible {
         return null;
     }
 
-    @Override
-    public abstract void procesarDestruccion();
 }

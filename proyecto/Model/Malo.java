@@ -5,11 +5,7 @@ public class Malo extends Nave {
         super(x, y);
     }
 
-    @Override
-    public void procesarDestruccion() {
-        if (estaViva()) {
-            removeNave();
-            EnemigoManager.getEnemigoManager().notificarColisionComposite(getCuerpo());
-        }
+    public void notificarDestruccion() {
+        EnemigoManager.getEnemigoManager().notificarDestruccionNave(this);
     }
 }

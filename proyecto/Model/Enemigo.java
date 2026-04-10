@@ -3,7 +3,7 @@ package Model;
 import java.util.Collections;
 import java.util.List;
 
-public class Enemigo implements Destructible {
+public class Enemigo {
     private Malo miNave;
 
     public Enemigo(Malo nave) {
@@ -22,12 +22,5 @@ public class Enemigo implements Destructible {
 
     public List<Pixel> getPixelesOcupados() {
         return miNave != null ? miNave.getPixelesOcupados() : Collections.emptyList();
-    }
-
-    @Override
-    public void procesarDestruccion() {
-        if (miNave != null) {
-            miNave.procesarDestruccion();
-        }
     }
 }

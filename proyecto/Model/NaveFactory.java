@@ -35,9 +35,18 @@ public class NaveFactory {
         }
     }
 
-    private void addPixel(Composite c, Pixel p, Destructible owner) {
-        p.setOwner(owner);
+    private void addPixel(Composite c, Pixel p, Object owner) {
+        // Añadir al composite y establecer el owner del composite.
         c.addComponente(p);
+        c.setOwner(owner);
+
+        // Registrar managers como observers del píxel para que reciban
+        // notificaciones de destrucción directamente (similar a GameBoard->View).
+        if (owner instanceof Malo) {
+            p.addObserver(EnemigoManager.getEnemigoManager());
+        } else {
+            p.addObserver(JugadorManager.getInstance());
+        }
     }
 
     private Bueno crearBuenoRed(Bueno nave, int x, int y) {
