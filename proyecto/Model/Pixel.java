@@ -96,17 +96,17 @@ public class Pixel extends Observable implements Entidad {
 
         GameBoard board = GameBoard.getGameBoard();
 
-        // If target goes out of bounds, destroy this pixel (prevents being stuck)
+        // If target goes out of bounds, the pixel suffers the impact
         if (!board.esPosicionValida(newX, newY)) {
-            this.procesarDestruccion();
+            this.impactar();
             return;
         }
 
         Pixel ocupante = board.getPixel(newX, newY);
 
         if (board.gestionarColision(this, ocupante)) {
-            // El PÍXEL se encarga de su destrucción y avisar al manager (dependencia USE)
-            this.procesarDestruccion();
+            // El PÍXEL sufre el impacto directamente
+            this.impactar();
             return;
         }
 
@@ -121,12 +121,7 @@ public class Pixel extends Observable implements Entidad {
         return Collections.singletonList(this);
     }
 
-    public void procesarDestruccion() {
-        // Delegar la orquestación de la destrucción a GameBoard.
-        // GameBoard ejecutará el impacto, permitirá que los managers borren
-        // componentes y al final actualizará la vista.
-        GameBoard.getGameBoard().procesarDestruccionDesdePixel(this);
-    }
+
 
     public void notificarDestruccion() {
         // Notificar a los observers registrados en ESTE píxel (managers) pasando solo coordenadas.

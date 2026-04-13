@@ -117,30 +117,12 @@ public class GameBoard extends Observable {
         }
     }
 
-    /**
-     * Orquesta la destrucción iniciada por un `Pixel`.
-     * Ejecuta el impacto (delegado al Estado), permite que los managers
-     * hagan las eliminaciones necesarias y finalmente notifica a la vista.
-     */
-    public void procesarDestruccionDesdePixel(Pixel p) {
-        synchronized (this) {
-            // Delegar la lógica de impacto (el Estado y los managers harán el resto)
-            p.impactar();
-
-            // Una vez completada la lógica de destrucción/borrado, actualizar vista
-            actualizarTablero();
-        }
-    }
-
-    // Nota: la notificación de destrucción se realiza desde `Pixel.notificarDestruccion()`;
-    // mantener `publishDestruction` en `GameBoard` generaba duplicidad de canales.
+    // Nota: La orquestación directa de destrucción desde GameBoard se evita
+    // para prevenir llamadas circulares. El estado del `Pixel` (State) debe
+    // encargarse de ejecutar `impactar()` y notificar managers/vistas.
 
     // --- Lógica de Juego (Colisiones y Movimiento) ---
 
-    /**
-     * Actúa como mediador de colisiones.
-     * Retorna true si hay colisión (frena el movimiento del 'movido').
-     */
     public boolean gestionarColision(Pixel movido, Pixel ocupante) {
         // 1. Validaciones previas
         if (ocupante == null || !ocupante.getEstado().estaOcupada())
@@ -151,17 +133,16 @@ public class GameBoard extends Observable {
         if (tipoMovido == tipoOcupante) {
             return false;
         }
-        // Regla especial: disparos se ignoran entre sí
+        // Evitar colisiones entre disparos
         if (tipoMovido == EstadoCasilla.TipoCasilla.DISPARO && tipoOcupante == EstadoCasilla.TipoCasilla.DISPARO)
             return false;
-
-        // Regla especial: disparos se ignoran entre sí (ya comprobado arriba)
 
         // 2. Detección de estado previo (para fin de juego)
         boolean naveInvolucrada = (tipoMovido == EstadoCasilla.TipoCasilla.NAVE) || (tipoOcupante == EstadoCasilla.TipoCasilla.NAVE);
 
-        // 3. Ejecución de la destrucción (la actualización la realizará GameBoard)
-        ocupante.procesarDestruccion();
+        // 3. Ejecución de la destrucción: delegar directamente al estado
+        // del píxel ocupante para que procese el impacto.
+        ocupante.impactar();
 
         // 4. Consecuencias de la colisión
         if (naveInvolucrada) {
