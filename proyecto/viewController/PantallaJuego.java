@@ -119,7 +119,7 @@ public class PantallaJuego extends JFrame implements Observer {
 					JugadorManager.getJugador().disparar();
 				}
 
-				if (key == KeyEvent.VK_C) {
+				if (  key == KeyEvent.VK_C) {
 					JugadorManager.getJugador().cambiarArma();
 				}
 				GameBoard.getGameBoard().actualizarTablero();

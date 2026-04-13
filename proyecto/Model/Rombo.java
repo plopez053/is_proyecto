@@ -12,9 +12,11 @@ public class Rombo implements EstrategiaDisparo {
         if (municion > 0) {
             municion--;
             int[][] desplazamientos = {
-                    { 0, -6 }, // Punta
-                    { -1, -5 }, { 0, -5 }, { 1, -5 }, // Centro
-                    { 0, -4 } // Base
+            		{ 0, -7 },
+                    { -1, -6 }, { 0, -6 }, { 1, -6 }, // Punta
+                    { -2, -5 }, { -1, -5 }, { 0, -5 }, { 1, -5 }, { 2, -5 }, // Centro
+                    { -1, -4 }, { 0, -4 }, { 1, -4 }, // Punta
+                    { 0, -3 },
             };
             listaDisparos.add(new Disparo(xCentral, yCentral, desplazamientos));
         }
