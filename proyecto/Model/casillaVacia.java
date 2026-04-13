@@ -12,6 +12,6 @@ public class casillaVacia implements EstadoCasilla {
 
     @Override
     public void impactar(Pixel contexto) {
-        // No hace nada: la casilla está vacía
+        
     }
 }

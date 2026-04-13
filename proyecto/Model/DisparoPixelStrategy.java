@@ -22,7 +22,7 @@ public class DisparoPixelStrategy implements EstrategiaDisparo {
 
     @Override
     public void setMunicion(int m) {
-        // No hace nada para ilimitados
+        
     }
 
     @Override

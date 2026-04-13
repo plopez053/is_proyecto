@@ -69,4 +69,8 @@ public abstract class Nave {
         return null;
     }
 
+    public void cambiarArma() {
+        // Por defecto no hace nada. Las naves concretas pueden sobreescribirlo.
+    }
+
 }

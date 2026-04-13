@@ -25,11 +25,6 @@ public class JugadorManager implements Observer {
         return instance;
     }
 
-    // Alias para compatibilidad con el código de los compañeros
-    public static JugadorManager getJugador() {
-        return getInstance();
-    }
-
     public void inicializarJugador(int x, int y) {
         if (tipoNave == null) {
             tipoNave = "BUENO_RED"; // default
@@ -37,10 +32,13 @@ public class JugadorManager implements Observer {
         nave = NaveFactory.getInstance().crearNave(tipoNave, x, y);
         disparosActivos = new ArrayList<>();
         if (nave != null && nave.getCuerpo() != null) {
+            // Registrar píxeles del cuerpo en este manager antes de asignar en el tablero
+            registerComposite(nave.getCuerpo());
             nave.getCuerpo().asignar();
         }
         iniciarTimerDisparos();
     }
+
 
     public Nave getNave() {
         return nave;
@@ -54,6 +52,7 @@ public class JugadorManager implements Observer {
         if (nave != null && nave.estaViva()) {
             nave.mover(dx, dy);
             evaluarEstadoJuego();
+            GameBoard.getGameBoard().actualizarTablero(); // Repintado único
         }
     }
 
@@ -78,6 +77,8 @@ public class JugadorManager implements Observer {
                 disparosActivos.addAll(nuevosDisparos);
                 for (Disparo d : nuevosDisparos) {
                     d.asignar();
+                    // Registrar píxeles del disparo en este manager
+                    registerDisparo(d);
                 }
             }
         }
@@ -113,29 +114,68 @@ public class JugadorManager implements Observer {
             // GameBoard
             d.mover(0, -1);
         }
+        GameBoard.getGameBoard().actualizarTablero(); // Repintado por lote (Batch)
     }
 
     public void setTipoNave(String tipo) {
         this.tipoNave = tipo;
     }
 
+    /**
+     * Registrar todos los píxeles de un Composite para que este manager reciba
+     * notificaciones de destrucción desde los píxeles.
+     */
+    public void registerComposite(Composite c) {
+        if (c == null)
+            return;
+        for (Pixel p : c.getPixelesOcupados()) {
+            if (p != null)
+                p.addObserver(this);
+        }
+    }
+
+    /** Registrar un solo Disparo (sus píxeles) */
+    public void registerDisparo(Disparo d) {
+        if (d == null || d.getCuerpo() == null)
+            return;
+        registerComposite(d.getCuerpo());
+    }
+
     public void cambiarArma() {
-        if (nave instanceof Bueno && nave.estaViva()) {
-            ((Bueno) nave).cambiarArma();
+        if (nave != null && nave.estaViva()) {
+            nave.cambiarArma();
         }
     }
 
     @Override
     public void update(Observable o, Object arg) {
-        if (arg instanceof Pixel) {
-            Pixel p = (Pixel) arg;
-            Composite parent = p.getParentComposite();
-            Object owner = (parent != null) ? parent.getOwner() : null;
-            if (owner instanceof Disparo) {
-                eliminarDisparoActivo((Disparo) owner);
-            } else if (owner instanceof Nave) {
-                if (nave != null && nave == owner) {
-                    notificarDestruccionNave();
+        if (arg instanceof int[]) {
+            int[] coords = (int[]) arg;
+            int x = coords[0];
+            int y = coords[1];
+            // Buscar y eliminar disparo activo que contenga ese pixel
+            Disparo disparoAEliminar = null;
+            for (Disparo d : disparosActivos) {
+                if (d != null && d.getCuerpo() != null) {
+                    for (Pixel px : d.getCuerpo().getPixelesOcupados()) {
+                        if (px.getX() == x && px.getY() == y) {
+                            disparoAEliminar = d;
+                            break;
+                        }
+                    }
+                }
+                if (disparoAEliminar != null) break;
+            }
+            if (disparoAEliminar != null) {
+                eliminarDisparoActivo(disparoAEliminar);
+            }
+            // Buscar si la nave tiene ese pixel
+            if (nave != null && nave.getCuerpo() != null) {
+                for (Pixel px : nave.getCuerpo().getPixelesOcupados()) {
+                    if (px.getX() == x && px.getY() == y) {
+                        notificarDestruccionNave();
+                        break;
+                    }
                 }
             }
         }

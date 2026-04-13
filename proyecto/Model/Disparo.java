@@ -14,19 +14,17 @@ public class Disparo {
     public Disparo(int x, int y) {
         this.cuerpo = new Composite();
         Pixel p = new Pixel(x, y, new casillaDisparo());
-        p.addObserver(JugadorManager.getInstance());
         this.cuerpo.addComponente(p);
-        this.cuerpo.setOwner(this);
+        // this.cuerpo.setOwner(this); // Removed setOwner call
     }
 
     public Disparo(int x, int y, int[][] desplazamientos) {
         this.cuerpo = new Composite();
         for (int[] dRelativo : desplazamientos) {
             Pixel p = new Pixel(x + dRelativo[0], y + dRelativo[1], new casillaDisparo());
-            p.addObserver(JugadorManager.getInstance());
             this.cuerpo.addComponente(p);
         }
-        this.cuerpo.setOwner(this);
+        // this.cuerpo.setOwner(this); // Removed setOwner call
     }
 
     public int getX() {
@@ -58,6 +56,7 @@ public class Disparo {
             cuerpo.mover(dx, dy);
         }
     }
+    
 
     public void asignar() {
         if (cuerpo != null) {

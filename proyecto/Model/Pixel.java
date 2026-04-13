@@ -13,22 +13,12 @@ public class Pixel extends Observable implements Entidad {
     protected int x;
     protected int y;
     protected EstadoCasilla estado;
-    // La referencia al propietario se gestiona ahora en la `Composite` que contiene
-    // este píxel. Aquí mantenemos un puntero al `Composite` padre.
-    private Composite parentComposite;
+    
 
     public Pixel(int x, int y, EstadoCasilla estado) {
         this.x = x;
         this.y = y;
         this.estado = estado;
-    }
-
-    public Composite getParentComposite() {
-        return parentComposite;
-    }
-
-    public void setParentComposite(Composite parentComposite) {
-        this.parentComposite = parentComposite;
     }
 
     public int getX() {
@@ -69,7 +59,7 @@ public class Pixel extends Observable implements Entidad {
         this.estado.impactar(this);
     }
 
-    // Métodos de conveniencia eliminados a favor del uso directo de getEstado().getTipo()
+    
     // o delegación comportamental (impactar).
 
     @Override
@@ -89,7 +79,9 @@ public class Pixel extends Observable implements Entidad {
     public void borrar() {
         GameBoard gb = GameBoard.getGameBoard();
         synchronized (gb) {
-            if (gb.getPixel(x, y) == this) {
+            // Defensive deletion: only clear if position valid and this instance
+            // is the one currently stored at the coordinates.
+            if (gb.esPosicionValida(x, y) && gb.getPixel(x, y) == this) {
                 gb.setPixel(x, y, null);
             }
         }
@@ -104,8 +96,11 @@ public class Pixel extends Observable implements Entidad {
 
         GameBoard board = GameBoard.getGameBoard();
 
-        if (!board.esPosicionValida(newX, newY))
+        // If target goes out of bounds, destroy this pixel (prevents being stuck)
+        if (!board.esPosicionValida(newX, newY)) {
+            this.procesarDestruccion();
             return;
+        }
 
         Pixel ocupante = board.getPixel(newX, newY);
 
@@ -118,7 +113,7 @@ public class Pixel extends Observable implements Entidad {
         setX(newX);
         setY(newY);
         board.actualizarPosicion(oldX, oldY, this);
-        board.actualizarTablero();
+        // La actualización visual del tablero debe hacerse solo desde GameBoard tras movimientos completos.
     }
 
     @Override
@@ -134,9 +129,10 @@ public class Pixel extends Observable implements Entidad {
     }
 
     public void notificarDestruccion() {
-        // Notificar a los observers registrados en ESTE píxel (managers).
+        // Notificar a los observers registrados en ESTE píxel (managers) pasando solo coordenadas.
         setChanged();
-        notifyObservers(this);
+        notifyObservers(new int[]{x, y});
     }
+
 
 }

@@ -5,26 +5,16 @@ import java.util.List;
 
 public class Composite implements Entidad {
     private List<Entidad> componentes = new ArrayList<>();
-    private Object owner;
 
     public void addComponente(Entidad ev) {
         componentes.add(ev);
-        if (ev instanceof Pixel) {
-            ((Pixel) ev).setParentComposite(this);
-        }
     }
 
     public void removeComponente(Entidad ev) {
         componentes.remove(ev);
     }
 
-    public void setOwner(Object owner) {
-        this.owner = owner;
-    }
-
-    public Object getOwner() {
-        return owner;
-    }
+    // Owner removed: liveness checks moved to managers/GameBoard
 
     public List<Entidad> getComponentes() {
         return componentes;
@@ -32,6 +22,8 @@ public class Composite implements Entidad {
 
     @Override
     public boolean canMove(int dx, int dy) {
+        if (componentes.isEmpty())
+            return false;
         for (Entidad ev : componentes) {
             if (ev != null && !ev.canMove(dx, dy)) {
                 return false;
@@ -42,6 +34,8 @@ public class Composite implements Entidad {
 
     @Override
     public void asignar() {
+        if (componentes.isEmpty())
+            return;
 
         for (Entidad ev : componentes) {
             if (ev != null)
@@ -51,34 +45,22 @@ public class Composite implements Entidad {
 
     @Override
     public void borrar() {
-        for (Entidad ev : componentes) {
-            if (ev != null)
-                ev.borrar();
+        List<Entidad> copia = new ArrayList<>(componentes);
+        for (Entidad ev : copia) {
+            if (ev != null) ev.borrar();
         }
+        componentes.clear(); // Vaciamos el composite al destruirlo
     }
 
     @Override
     public void mover(int dx, int dy) {
         List<Entidad> copia = new ArrayList<>(componentes);
         for (Entidad ev : copia) {
+            // Si la lista principal se vació durante el choque, abortamos para evitar píxeles fantasma
+            if (componentes.isEmpty()) break;
+
             if (ev != null) {
                 ev.mover(dx, dy);
-
-                // Si tras mover este píxel el dueño (Nave o Disparo) ha muerto,
-                // abortamos inmediatamente para no dejar píxeles fantasma.
-                if (ev instanceof Pixel) {
-                    Pixel p = (Pixel) ev;
-                    Composite parent = p.getParentComposite();
-                    Object owner = (parent != null) ? parent.getOwner() : null;
-
-                    if (owner instanceof Nave) {
-                        if (!((Nave) owner).estaViva())
-                            break;
-                    } else if (owner instanceof Disparo) {
-                        if (!((Disparo) owner).estaVivo())
-                            break;
-                    }
-                }
             }
         }
     }

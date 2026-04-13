@@ -86,6 +86,8 @@ public class EnemigoManager implements Observer {
                 Enemigo nuevoEnemigo = new Enemigo(nuevaNave);
                 enemigos.add(nuevoEnemigo);
                 if (nuevaNave.getCuerpo() != null) {
+                    // Registrar píxeles del cuerpo en este manager antes de asignar en el tablero
+                    registerComposite(nuevaNave.getCuerpo());
                     nuevaNave.getCuerpo().asignar();
                 }
             }
@@ -138,9 +140,7 @@ public class EnemigoManager implements Observer {
         }
     }
 
-    public List<Enemigo> getEnemigos() {
-        return enemigos;
-    }
+    
 
     public void matarEnemigoEnCoordenada(int x, int y) {
         Enemigo aEliminar = getEnemigoEn(x, y);
@@ -152,22 +152,51 @@ public class EnemigoManager implements Observer {
     public void removeEnemigo(Enemigo e) {
         enemigos.remove(e);
         if (e.getNave() != null) {
-            e.getNave().removeNave();
             if (e.getNave().getCuerpo() != null) {
-                e.getNave().getCuerpo().borrar();
+                    e.getNave().removeNave();
+                    e.getNave().getCuerpo().borrar();
+            } else {
+                e.getNave().removeNave();
             }
+        }
+    }
+
+    /** Registrar todos los píxeles de un Composite para que este manager reciba
+     * notificaciones de destrucción desde los píxeles.
+     */
+    public void registerComposite(Composite c) {
+        if (c == null)
+            return;
+        for (Pixel p : c.getPixelesOcupados()) {
+            if (p != null)
+                p.addObserver(this);
         }
     }
 
     @Override
     public void update(Observable o, Object arg) {
-        if (arg instanceof Pixel) {
-            Pixel p = (Pixel) arg;
-            Composite parent = p.getParentComposite();
-            Object owner = (parent != null) ? parent.getOwner() : null;
-            if (owner instanceof Malo) {
-                notificarDestruccionNave((Malo) owner);
+        if (arg instanceof int[]) {
+            int[] coords = (int[]) arg;
+            int x = coords[0];
+            int y = coords[1];
+            // Buscar si algún enemigo tiene ese pixel
+            Malo maloAEliminar = null;
+            for (Enemigo enemigo : enemigos) {
+                Malo malo = enemigo.getNave();
+                if (malo != null && malo.getCuerpo() != null) {
+                    for (Pixel px : malo.getCuerpo().getPixelesOcupados()) {
+                        if (px.getX() == x && px.getY() == y) {
+                            maloAEliminar = malo;
+                            break;
+                        }
+                    }
+                }
+                if (maloAEliminar != null) break;
+            }
+            if (maloAEliminar != null) {
+                notificarDestruccionNave(maloAEliminar);
             }
         }
     }
 }
+

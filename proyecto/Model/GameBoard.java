@@ -57,22 +57,29 @@ public class GameBoard extends Observable {
 
     // --- Gestión de la Matriz (Píxeles) ---
     public Pixel getPixel(int x, int y) {
-        if (esPosicionValida(x, y))
+        if (!esPosicionValida(x, y))
+            return null;
+        synchronized (this) {
             return matrix[y][x];
-        return null;
+        }
     }
 
     public void setPixel(int x, int y, Pixel p) {
-        if (esPosicionValida(x, y))
+        if (!esPosicionValida(x, y))
+            return;
+        synchronized (this) {
             matrix[y][x] = p;
+        }
     }
 
 
     // --- Ciclo de Vida y Control del Juego ---
     public void clearBoard() {
-        for (int i = 0; i < height; i++) {
-            for (int j = 0; j < width; j++) {
-                matrix[i][j] = null;
+        synchronized (this) {
+            for (int i = 0; i < height; i++) {
+                for (int j = 0; j < width; j++) {
+                    matrix[i][j] = null;
+                }
             }
         }
     }
@@ -125,13 +132,8 @@ public class GameBoard extends Observable {
         }
     }
 
-    /** Publica un evento de destrucción a los observers (managers, etc.). */
-    public void publishDestruction(Pixel p) {
-        setChanged();
-        // Notificamos directamente el Pixel (los observers comprobarán el owner
-        // a través del Composite padre).
-        notifyObservers(p);
-    }
+    // Nota: la notificación de destrucción se realiza desde `Pixel.notificarDestruccion()`;
+    // mantener `publishDestruction` en `GameBoard` generaba duplicidad de canales.
 
     // --- Lógica de Juego (Colisiones y Movimiento) ---
 
@@ -143,21 +145,17 @@ public class GameBoard extends Observable {
         // 1. Validaciones previas
         if (ocupante == null || !ocupante.getEstado().estaOcupada())
             return false;
-        Composite pm = movido.getParentComposite();
-        Composite po = ocupante.getParentComposite();
-        if (pm != null && po != null) {
-            Object ownerMov = pm.getOwner();
-            Object ownerOcc = po.getOwner();
-            if (ownerMov != null && ownerMov == ownerOcc)
-                return false;
-        }
-
-        // Regla especial: disparos se ignoran entre sí
+        // Ignorar colisiones entre píxeles del mismo tipo (State)
         EstadoCasilla.TipoCasilla tipoMovido = movido.getEstado().getTipo();
         EstadoCasilla.TipoCasilla tipoOcupante = ocupante.getEstado().getTipo();
-
+        if (tipoMovido == tipoOcupante) {
+            return false;
+        }
+        // Regla especial: disparos se ignoran entre sí
         if (tipoMovido == EstadoCasilla.TipoCasilla.DISPARO && tipoOcupante == EstadoCasilla.TipoCasilla.DISPARO)
             return false;
+
+        // Regla especial: disparos se ignoran entre sí (ya comprobado arriba)
 
         // 2. Detección de estado previo (para fin de juego)
         boolean naveInvolucrada = (tipoMovido == EstadoCasilla.TipoCasilla.NAVE) || (tipoOcupante == EstadoCasilla.TipoCasilla.NAVE);
@@ -174,20 +172,22 @@ public class GameBoard extends Observable {
     }
 
     public void actualizarPosicion(int viejaX, int viejaY, Pixel p) {
-        // Borrar de la posición antigua
-        if (esPosicionValida(viejaX, viejaY)) {
-            if (matrix[viejaY][viejaX] == p) {
-                matrix[viejaY][viejaX] = null;
+        synchronized (this) {
+            // Borrar de la posición antigua
+            if (esPosicionValida(viejaX, viejaY)) {
+                if (matrix[viejaY][viejaX] == p) {
+                    matrix[viejaY][viejaX] = null;
+                }
             }
-        }
 
-        // Colocar en la nueva posición
-        if (esPosicionValida(p.getX(), p.getY())) {
-            matrix[p.getY()][p.getX()] = p;
+            // Colocar en la nueva posición
+            if (esPosicionValida(p.getX(), p.getY())) {
+                matrix[p.getY()][p.getX()] = p;
 
-            // Condición de derrota: enemigo llega al fondo
-            if (p.getEstado().getTipo() == EstadoCasilla.TipoCasilla.ENEMIGO && p.getY() >= height - 1) {
-                finalizarJuego();
+                // Condición de derrota: enemigo llega al fondo
+                if (p.getEstado().getTipo() == EstadoCasilla.TipoCasilla.ENEMIGO && p.getY() >= height - 1) {
+                    finalizarJuego();
+                }
             }
         }
     }
@@ -203,30 +203,32 @@ public class GameBoard extends Observable {
         int[][] snapshot = new int[height][width];
         String tipoN = getTipoNave();
 
-        for (int i = 0; i < height; i++) {
-            for (int j = 0; j < width; j++) {
-                Pixel p = matrix[i][j];
+        synchronized (this) {
+            for (int i = 0; i < height; i++) {
+                for (int j = 0; j < width; j++) {
+                    Pixel p = matrix[i][j];
 
-                EstadoCasilla.TipoCasilla tipo = (p == null) ? EstadoCasilla.TipoCasilla.VACIA : p.getEstado().getTipo();
+                    EstadoCasilla.TipoCasilla tipo = (p == null) ? EstadoCasilla.TipoCasilla.VACIA : p.getEstado().getTipo();
 
-                if (tipo == EstadoCasilla.TipoCasilla.VACIA) {
-                    snapshot[i][j] = 3; // Vacío
-                } else if (tipo == EstadoCasilla.TipoCasilla.DISPARO) {
-                    snapshot[i][j] = 2; // Disparo
-                } else if (tipo == EstadoCasilla.TipoCasilla.ENEMIGO) {
-                    snapshot[i][j] = 0; // Enemigo
-                } else if (tipo == EstadoCasilla.TipoCasilla.NAVE) {
-                    // Colores de la nave del jugador
-                    if ("BUENO_RED".equals(tipoN))
-                        snapshot[i][j] = 1;
-                    else if ("BUENO_GREEN".equals(tipoN))
-                        snapshot[i][j] = 4;
-                    else if ("BUENO_BLUE".equals(tipoN))
-                        snapshot[i][j] = 5;
-                    else
-                        snapshot[i][j] = 1;
-                } else {
-                    snapshot[i][j] = 3;
+                    if (tipo == EstadoCasilla.TipoCasilla.VACIA) {
+                        snapshot[i][j] = 3; // Vacío
+                    } else if (tipo == EstadoCasilla.TipoCasilla.DISPARO) {
+                        snapshot[i][j] = 2; // Disparo
+                    } else if (tipo == EstadoCasilla.TipoCasilla.ENEMIGO) {
+                        snapshot[i][j] = 0; // Enemigo
+                    } else if (tipo == EstadoCasilla.TipoCasilla.NAVE) {
+                        // Colores de la nave del jugador
+                        if ("BUENO_RED".equals(tipoN))
+                            snapshot[i][j] = 1;
+                        else if ("BUENO_GREEN".equals(tipoN))
+                            snapshot[i][j] = 4;
+                        else if ("BUENO_BLUE".equals(tipoN))
+                            snapshot[i][j] = 5;
+                        else
+                            snapshot[i][j] = 1;
+                    } else {
+                        snapshot[i][j] = 3;
+                    }
                 }
             }
         }
