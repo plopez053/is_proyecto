@@ -10,7 +10,7 @@ import java.util.TimerTask;
 public class JugadorManager implements Observer {
     private static JugadorManager instance;
     private Nave nave;
-    private List<Disparo> disparosActivos;
+    private List<Composite> disparosActivos;
     private Timer timerDisparos;
     private String tipoNave;
 
@@ -44,7 +44,7 @@ public class JugadorManager implements Observer {
         return nave;
     }
 
-    public List<Disparo> getDisparosActivos() {
+    public List<Composite> getDisparosActivos() {
         return disparosActivos;
     }
 
@@ -72,23 +72,19 @@ public class JugadorManager implements Observer {
 
     public void disparar() {
         if (nave != null && nave.estaViva()) {
-            List<Disparo> nuevosDisparos = nave.disparar();
-            if (nuevosDisparos != null) {
-                disparosActivos.addAll(nuevosDisparos);
-                for (Disparo d : nuevosDisparos) {
-                    d.asignar();
-                    // Registrar píxeles del disparo en este manager
-                    registerDisparo(d);
-                }
+            Composite nuevoDisparo = nave.disparar();
+            if (nuevoDisparo != null) {
+                disparosActivos.add(nuevoDisparo);
+                registerComposite(nuevoDisparo);
+                nuevoDisparo.asignar();
             }
         }
     }
 
-    public void eliminarDisparoActivo(Disparo d) {
-        if (disparosActivos != null && disparosActivos.contains(d)) {
-            disparosActivos.remove(d);
-            d.markAsDestroyed();
-            d.borrar();
+    public void eliminarDisparoActivo(Composite c) {
+        if (disparosActivos != null && disparosActivos.contains(c)) {
+            disparosActivos.remove(c);
+            c.borrar();
         }
     }
 
@@ -108,11 +104,11 @@ public class JugadorManager implements Observer {
     }
 
     private void moverDisparos() {
-        List<Disparo> copia = new ArrayList<>(disparosActivos);
-        for (Disparo d : copia) {
+        List<Composite> copia = new ArrayList<>(disparosActivos);
+        for (Composite c : copia) {
             // El movimiento del proyectil ahora disparará la lógica de colisiones en
             // GameBoard
-            d.mover(0, -1);
+            c.mover(0, -1);
         }
         GameBoard.getGameBoard().actualizarTablero(); // Repintado por lote (Batch)
     }
@@ -135,10 +131,10 @@ public class JugadorManager implements Observer {
     }
 
     /** Registrar un solo Disparo (sus píxeles) */
-    public void registerDisparo(Disparo d) {
-        if (d == null || d.getCuerpo() == null)
+    public void registerDisparo(Composite c) {
+        if (c == null)
             return;
-        registerComposite(d.getCuerpo());
+        registerComposite(c);
     }
 
     public void cambiarArma() {
@@ -154,12 +150,12 @@ public class JugadorManager implements Observer {
             int x = coords[0];
             int y = coords[1];
             // Buscar y eliminar disparo activo que contenga ese pixel
-            Disparo disparoAEliminar = null;
-            for (Disparo d : disparosActivos) {
-                if (d != null && d.getCuerpo() != null) {
-                    for (Pixel px : d.getCuerpo().getPixelesOcupados()) {
+            Composite disparoAEliminar = null;
+            for (Composite c : disparosActivos) {
+                if (c != null) {
+                    for (Pixel px : c.getPixelesOcupados()) {
                         if (px.getX() == x && px.getY() == y) {
-                            disparoAEliminar = d;
+                            disparoAEliminar = c;
                             break;
                         }
                     }

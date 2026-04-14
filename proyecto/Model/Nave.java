@@ -65,7 +65,7 @@ public abstract class Nave {
         return viva;
     }
 
-    public List<Disparo> disparar() {
+    public Composite disparar() {
         return null;
     }
 

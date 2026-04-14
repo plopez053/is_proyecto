@@ -1,14 +1,10 @@
 package Model;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class Flecha implements EstrategiaDisparo {
     private int municion = 30;
 
     @Override
-    public List<Disparo> disparar(int xCentral, int yCentral) {
-        List<Disparo> listaDisparos = new ArrayList<>();
+    public Composite disparar(int xCentral, int yCentral) {
         if (municion > 0) {
             municion--;
             int[][] desplazamientos = {
@@ -16,9 +12,13 @@ public class Flecha implements EstrategiaDisparo {
                     { -1, -3 }, // Diagonal abajo izq
                     { 1, -3 } // Diagonal abajo der
             };
-            listaDisparos.add(new Disparo(xCentral, yCentral, desplazamientos));
+            Composite cuerpo = new Composite();
+            for (int[] d : desplazamientos) {
+                cuerpo.addComponente(new Pixel(xCentral + d[0], yCentral + d[1], new casillaDisparo()));
+            }
+            return cuerpo;
         }
-        return listaDisparos;
+        return null;
     }
 
     @Override

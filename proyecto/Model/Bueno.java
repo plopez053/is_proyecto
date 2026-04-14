@@ -39,7 +39,7 @@ public class Bueno extends Nave {
         }
     }
 
-    public List<Disparo> disparar() {
+    public Composite disparar() {
         EstrategiaDisparo arma = getArmaActual();
         if (arma != null) {
             // Si es un arma limitada y no tiene munición, intentar volver a la primera

@@ -1,18 +1,15 @@
-  package Model;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+package Model;
 
 public class DisparoPixelStrategy implements EstrategiaDisparo {
     @Override
-    public List<Disparo> disparar(int xCentral, int yCentral) {
+    public Composite disparar(int xCentral, int yCentral) {
         int shotY = yCentral - 4;
-        List<Disparo> listaDisparos = new ArrayList<>();
         if (shotY >= 0) {
-            listaDisparos.add(new Disparo(xCentral, shotY));
+            Composite cuerpo = new Composite();
+            cuerpo.addComponente(new Pixel(xCentral, shotY, new casillaDisparo()));
+            return cuerpo;
         }
-        return listaDisparos;
+        return null;
     }
 
     @Override
@@ -22,7 +19,7 @@ public class DisparoPixelStrategy implements EstrategiaDisparo {
 
     @Override
     public void setMunicion(int m) {
-        
+        // no-op
     }
 
     @Override
