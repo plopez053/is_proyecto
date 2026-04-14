@@ -1,20 +1,16 @@
 package Model;
 
 public class NaveFactory {
-    private static NaveFactory instance;
+    private static NaveFactory miNaveFactory;
 
     private NaveFactory() {
     }
 
-    public static NaveFactory getInstance() {
-        if (instance == null) {
-            instance = new NaveFactory();
-        }
-        return instance;
-    }
-
     public static NaveFactory getNaveFactory() {
-        return getInstance();
+        if (miNaveFactory == null) {
+            miNaveFactory = new NaveFactory();
+        }
+        return miNaveFactory;
     }
 
     public Nave crearNave(String tipo, int x, int y) {

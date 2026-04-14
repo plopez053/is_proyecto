@@ -101,26 +101,26 @@ public class PantallaJuego extends JFrame implements Observer {
 			int key = e.getKeyCode();
 			if (!juegoTerminado) {
 				if (key == KeyEvent.VK_LEFT) {
-					JugadorManager.getInstance().moverNave(-1, 0);
+					JugadorManager.getJugadorManager().moverNave(-1, 0);
 				}
 
 				if (key == KeyEvent.VK_RIGHT) {
-					JugadorManager.getInstance().moverNave(1, 0);
+					JugadorManager.getJugadorManager().moverNave(1, 0);
 				}
 
 				if (key == KeyEvent.VK_UP) {
-					JugadorManager.getInstance().moverNave(0, -1);
+					JugadorManager.getJugadorManager().moverNave(0, -1);
 				}
 				if (key == KeyEvent.VK_DOWN) {
-					JugadorManager.getInstance().moverNave(0, 1);
+					JugadorManager.getJugadorManager().moverNave(0, 1);
 				}
 
 				if (key == KeyEvent.VK_SPACE) {
-					JugadorManager.getInstance().disparar();
+					JugadorManager.getJugadorManager().disparar();
 				}
 
 				if (  key == KeyEvent.VK_C) {
-					JugadorManager.getInstance().cambiarArma();
+					JugadorManager.getJugadorManager().cambiarArma();
 				}
 				GameBoard.getGameBoard().actualizarTablero();
 			}

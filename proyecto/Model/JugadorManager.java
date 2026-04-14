@@ -8,7 +8,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class JugadorManager implements Observer {
-    private static JugadorManager instance;
+    private static JugadorManager miJugadorManager;
     private Nave nave;
     private List<Composite> disparosActivos;
     private Timer timerDisparos;
@@ -18,18 +18,18 @@ public class JugadorManager implements Observer {
         disparosActivos = new ArrayList<>();
     }
 
-    public static JugadorManager getInstance() {
-        if (instance == null) {
-            instance = new JugadorManager();
+    public static JugadorManager getJugadorManager() {
+        if (miJugadorManager == null) {
+            miJugadorManager = new JugadorManager();
         }
-        return instance;
+        return miJugadorManager;
     }
 
     public void inicializarJugador(int x, int y) {
         if (tipoNave == null) {
             tipoNave = "BUENO_RED"; // default
         }
-        nave = NaveFactory.getInstance().crearNave(tipoNave, x, y);
+        nave = NaveFactory.getNaveFactory().crearNave(tipoNave, x, y);
         disparosActivos = new ArrayList<>();
         if (nave != null && nave.getCuerpo() != null) {
             // Registrar píxeles del cuerpo en este manager antes de asignar en el tablero

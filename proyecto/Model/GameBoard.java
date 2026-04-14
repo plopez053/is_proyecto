@@ -89,8 +89,8 @@ public class GameBoard extends Observable {
         juegoFinalizado = false;
 
         // Inicialización de Managers
-        JugadorManager.getInstance().setTipoNave(tipoNave);
-        JugadorManager.getInstance().inicializarJugador(posXInicio, posYInicio);
+        JugadorManager.getJugadorManager().setTipoNave(tipoNave);
+        JugadorManager.getJugadorManager().inicializarJugador(posXInicio, posYInicio);
         EnemigoManager.getEnemigoManager().spawnEnemies();
         EnemigoManager.getEnemigoManager().iniciarTimerEnemigos();
 

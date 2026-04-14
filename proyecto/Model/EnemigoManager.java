@@ -82,7 +82,7 @@ public class EnemigoManager implements Observer {
             } while (positionInvalid);
 
             if (!positionInvalid) {
-                Malo nuevaNave = (Malo) NaveFactory.getInstance().crearNave("Malo", x, y);
+                Malo nuevaNave = (Malo) NaveFactory.getNaveFactory().crearNave("Malo", x, y);
                 Enemigo nuevoEnemigo = new Enemigo(nuevaNave);
                 enemigos.add(nuevoEnemigo);
                 if (nuevaNave.getCuerpo() != null) {

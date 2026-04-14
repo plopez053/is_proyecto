@@ -54,6 +54,6 @@ public class Bueno extends Nave {
     }
 
     public void notificarDestruccion() {
-        JugadorManager.getInstance().notificarDestruccionNave();
+        JugadorManager.getJugadorManager().notificarDestruccionNave();
     }
 }
