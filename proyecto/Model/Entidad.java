@@ -15,8 +15,4 @@ public interface Entidad {
 
 
 
-    // Alias para compatibilidad
-    default List<Pixel> getCasillasOcupadas() {
-        return getPixelesOcupados();
-    }
 }

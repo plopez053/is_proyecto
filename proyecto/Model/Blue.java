@@ -1,5 +1,6 @@
 package Model;
-
+import java.util.ArrayList;
+import java.util.List;
 public class Blue extends Bueno {
     public Blue(int x, int y) {
         super(x, y);
@@ -12,7 +13,7 @@ public class Blue extends Bueno {
 
         this.setCuerpo(cuerpo);
 
-        java.util.List<EstrategiaDisparo> armas = new java.util.ArrayList<>();
+        List<EstrategiaDisparo> armas = new ArrayList<>();
         armas.add(new DisparoPixelStrategy());
         armas.add(new Rombo());
         this.setArmasDisponibles(armas);

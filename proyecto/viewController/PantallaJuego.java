@@ -1,13 +1,12 @@
 package viewController;
 
+import Model.GameBoard;
+import Model.JugadorManager;
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.EventQueue;
 import java.awt.Graphics;
 import java.awt.GridLayout;
 import java.awt.Image;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.WindowEvent;
@@ -15,7 +14,6 @@ import java.awt.event.WindowListener;
 import java.net.URL;
 import java.util.Observable;
 import java.util.Observer;
-
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
@@ -23,9 +21,6 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
-
-import Model.GameBoard;
-import Model.JugadorManager;
 
 public class PantallaJuego extends JFrame implements Observer {
 
@@ -37,8 +32,6 @@ public class PantallaJuego extends JFrame implements Observer {
 	private Controlador2 controlador2;
 	private int boardHeight = 60;
 	private int boardWidth = 100;
-	private boolean juegoTerminado = false; // Igual es buena práctica tener un booleano que si se ha acabado la partida
-											// no permita ejecutar movimientos.
 
 	/**
 	 * Create the frame.
@@ -99,7 +92,6 @@ public class PantallaJuego extends JFrame implements Observer {
 		public void keyPressed(KeyEvent e) {
 
 			int key = e.getKeyCode();
-			if (!juegoTerminado) {
 				if (key == KeyEvent.VK_LEFT) {
 					JugadorManager.getJugadorManager().moverNave(-1, 0);
 				}
@@ -123,7 +115,7 @@ public class PantallaJuego extends JFrame implements Observer {
 					JugadorManager.getJugadorManager().cambiarArma();
 				}
 				GameBoard.getGameBoard().actualizarTablero();
-			}
+			
 		}
 
 		@Override
@@ -223,7 +215,6 @@ public class PantallaJuego extends JFrame implements Observer {
 				if (fin == 2) {
 					JOptionPane.showMessageDialog(contentPane, "GAME OVER", "TRY IT AGAIN",
 							JOptionPane.INFORMATION_MESSAGE);
-					juegoTerminado = true;
 					System.exit(0); // Se cierra la pantalla. Pero igual es mejor forma hacer que al pulsar OK,
 									// vuelva a la pantalla ppal para reiniciar juego.
 				}
