@@ -72,5 +72,9 @@ public abstract class Nave {
     public void cambiarArma() {
         // Por defecto no hace nada. Las naves concretas pueden sobreescribirlo.
     }
+    
+    public void recibirImpacto() {
+        removeNave(); // Comportamiento por defecto: muerte inmediata
+    }
 
 }

@@ -5,7 +5,7 @@ public interface EstadoCasilla {
      * Enum para identificar el tipo de casilla sin usar booleanos.
      */
     enum TipoCasilla {
-        VACIA, NAVE, ENEMIGO, DISPARO
+        VACIA, NAVE, ENEMIGO, DISPARO, BOSS
     }
 
     /**

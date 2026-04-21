@@ -176,4 +176,25 @@ public class JugadorManager implements Observer {
             }
         }
     }
+    
+    public String getNombreArmaActual() {
+        if (nave instanceof Bueno) {
+            Bueno bueno = (Bueno) nave;
+            if (bueno.getArmaActual() != null) {
+                return bueno.getArmaActual().getNombre();
+            }
+        }
+        return "-";
+    }
+
+    public String getMunicionArmaActual() {
+        if (nave instanceof Bueno) {
+            Bueno bueno = (Bueno) nave;
+            if (bueno.getArmaActual() != null) {
+                int municion = bueno.getArmaActual().getMunicion();
+                return municion == -1 ? "Municion Ilimitada" : String.valueOf(municion);
+            }
+        }
+        return "-";
+    }
 }

@@ -35,7 +35,6 @@ public class Bueno extends Nave {
     public void cambiarArma() {
         if (armasDisponibles.size() > 1) {
             armaIndice = (armaIndice + 1) % armasDisponibles.size();
-            System.out.println("Cambiando arma a: " + getArmaActual().getNombre());
         }
     }
 

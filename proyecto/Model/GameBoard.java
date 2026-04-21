@@ -197,6 +197,9 @@ public class GameBoard extends Observable {
                         snapshot[i][j] = 2; // Disparo
                     } else if (tipo == EstadoCasilla.TipoCasilla.ENEMIGO) {
                         snapshot[i][j] = 0; // Enemigo
+                    } else if (tipo == EstadoCasilla.TipoCasilla.BOSS) {
+                        snapshot[i][j] = 6;
+                        
                     } else if (tipo == EstadoCasilla.TipoCasilla.NAVE) {
                         // Colores de la nave del jugador
                         if ("BUENO_RED".equals(tipoN))

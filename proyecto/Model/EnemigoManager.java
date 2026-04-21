@@ -12,6 +12,9 @@ public class EnemigoManager implements Observer {
     private static EnemigoManager miEnemigoManager;
     private List<Enemigo> enemigos;
     private Random random;
+    private FinalBoss boss = null;
+    private int direccionBoss = 1; // 1 = derecha, -1 = izquierda
+    private Timer timerBoss;
     private Timer timerEnemigos;
 
     private EnemigoManager() {
@@ -35,7 +38,7 @@ public class EnemigoManager implements Observer {
             }
         };
         timerEnemigos = new Timer();
-        timerEnemigos.schedule(task, 1000, 200);
+        timerEnemigos.schedule(task, 1000, 400);
     }
 
     public void detenerTimerEnemigos() {
@@ -152,12 +155,15 @@ public class EnemigoManager implements Observer {
     public void removeEnemigo(Enemigo e) {
         enemigos.remove(e);
         if (e.getNave() != null) {
+            e.getNave().removeNave();
             if (e.getNave().getCuerpo() != null) {
-                    e.getNave().removeNave();
-                    e.getNave().getCuerpo().borrar();
-            } else {
-                e.getNave().removeNave();
+                e.getNave().getCuerpo().borrar();
             }
+        }
+        // Cuando caen todos los enemigos, aparece el boss
+        if (enemigos.isEmpty() && boss == null) {
+            detenerTimerEnemigos();
+            spawnBoss();
         }
     }
 
@@ -172,31 +178,81 @@ public class EnemigoManager implements Observer {
                 p.addObserver(this);
         }
     }
+    public void spawnBoss() {
+        int centroX = GameBoard.getGameBoard().getWidth() / 2;
+        boss = (FinalBoss) NaveFactory.getNaveFactory().crearNave("BOSS", centroX, 5);
+        if (boss.getCuerpo() != null) {
+            boss.getCuerpo().asignar();
+        }
+        iniciarTimerBoss();
+        GameBoard.getGameBoard().actualizarTablero();
+    }
 
+    private void iniciarTimerBoss() {
+        if (timerBoss != null) timerBoss.cancel();
+        timerBoss = new Timer();
+        timerBoss.schedule(new TimerTask() {
+            @Override public void run() { moverBoss(); }
+        }, 500, 300);
+    }
+
+    private void moverBoss() {
+        if (boss == null || !boss.estaViva()) return;
+        if (!boss.getCuerpo().canMove(direccionBoss, 0)) {
+            direccionBoss *= -1;
+        }
+        boss.mover(direccionBoss, 0);
+        GameBoard.getGameBoard().actualizarTablero();
+    }
+
+    public void notificarDestruccionBoss(FinalBoss b) {
+        if (timerBoss != null) {
+            timerBoss.cancel();
+            timerBoss = null;
+        }
+        boss = null;
+        b.getCuerpo().borrar();
+        GameBoard.getGameBoard().actualizarTablero();
+        // Para notificar victoria habria q agregar algo aqui
+    }
     @Override
     public void update(Observable o, Object arg) {
         if (arg instanceof int[]) {
             int[] coords = (int[]) arg;
             int x = coords[0];
             int y = coords[1];
-            // Buscar si algún enemigo tiene ese pixel
-            Malo maloAEliminar = null;
-            for (Enemigo enemigo : enemigos) {
-                Malo malo = enemigo.getNave();
-                if (malo != null && malo.getCuerpo() != null) {
-                    for (Pixel px : malo.getCuerpo().getPixelesOcupados()) {
-                        if (px.getX() == x && px.getY() == y) {
-                            maloAEliminar = malo;
-                            break;
-                        }
+
+            // Primero comprobar si es el boss
+            if (boss != null && boss.estaViva()) {
+                for (Pixel p : boss.getPixelesOcupados()) {
+                    if (p.getX() == x && p.getY() == y) {
+                        boss.recibirImpacto(); 
+                        return;
                     }
                 }
-                if (maloAEliminar != null) break;
             }
-            if (maloAEliminar != null) {
-                notificarDestruccionNave(maloAEliminar);
+
+            // Si no, buscar enemigo normal
+            Enemigo aEliminar = null;
+            for (Enemigo e : new ArrayList<>(enemigos)) {
+                for (Pixel p : e.getPixelesOcupados()) {
+                    if (p.getX() == x && p.getY() == y) {
+                        aEliminar = e;
+                        break;
+                    }
+                }
+                if (aEliminar != null) break;
             }
+            if (aEliminar != null) removeEnemigo(aEliminar);
         }
+        
+
     }
+    
+
+
+    
+    
+   
 }
 

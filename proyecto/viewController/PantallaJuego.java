@@ -32,6 +32,7 @@ public class PantallaJuego extends JFrame implements Observer {
 	private Controlador2 controlador2;
 	private int boardHeight = 60;
 	private int boardWidth = 100;
+	private JLabel armaLabel;
 
 	/**
 	 * Create the frame.
@@ -77,6 +78,14 @@ public class PantallaJuego extends JFrame implements Observer {
 				labels[i][j] = label;
 			}
 		}
+		armaLabel = new JLabel("Arma: -    Munición: -");
+        armaLabel.setForeground(Color.WHITE);
+        armaLabel.setFont(armaLabel.getFont().deriveFont(14f));
+        armaLabel.setBorder(BorderFactory.createEmptyBorder(4, 10, 4, 10));
+        JPanel hudPanel = new JPanel(new BorderLayout());
+        hudPanel.setBackground(new Color(0, 0, 0, 180));
+        hudPanel.add(armaLabel, BorderLayout.WEST);
+        contentPane.add(hudPanel, BorderLayout.SOUTH);
 	}
 
 	private Controlador2 getControlador2() {
@@ -109,10 +118,12 @@ public class PantallaJuego extends JFrame implements Observer {
 
 				if (key == KeyEvent.VK_SPACE) {
 					JugadorManager.getJugadorManager().disparar();
+					actualizarHUD();
 				}
 
 				if (  key == KeyEvent.VK_C) {
 					JugadorManager.getJugadorManager().cambiarArma();
+					actualizarHUD();
 				}
 				GameBoard.getGameBoard().actualizarTablero();
 			
@@ -133,6 +144,7 @@ public class PantallaJuego extends JFrame implements Observer {
 		@Override
 		public void windowOpened(WindowEvent e) {
 			GameBoard.getGameBoard().actualizarTablero();
+			actualizarHUD();
 		}
 
 		@Override
@@ -172,7 +184,13 @@ public class PantallaJuego extends JFrame implements Observer {
 		}
 
 	}
-
+	
+	private void actualizarHUD() {
+	    String nombre = JugadorManager.getJugadorManager().getNombreArmaActual();
+	    String municion = JugadorManager.getJugadorManager().getMunicionArmaActual();
+	    armaLabel.setText("Arma: " + nombre + "    Munición: " + municion + "    [C] cambiar");
+	}
+	    
 	@Override
 	public void update(Observable o, Object arg) {
 		if (arg instanceof Object[] && labels != null) {
@@ -205,6 +223,10 @@ public class PantallaJuego extends JFrame implements Observer {
 							labels[i][j].setOpaque(true);
 							labels[i][j].setBackground(Color.BLUE);
 							labels[i][j].setBorder(BorderFactory.createLineBorder(Color.gray));
+						} else if (tipo == 6) {
+						    labels[i][j].setOpaque(true);
+						    labels[i][j].setBackground(Color.MAGENTA);
+						    labels[i][j].setBorder(BorderFactory.createLineBorder(Color.gray));
 						} else { // Vacia
 							labels[i][j].setOpaque(false);
 							labels[i][j].setBorder(null);
