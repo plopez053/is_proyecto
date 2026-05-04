@@ -116,17 +116,19 @@ public class Pixel extends Observable implements Entidad {
         // La actualización visual del tablero debe hacerse solo desde GameBoard tras movimientos completos.
     }
 
-    @Override
     public List<Pixel> getPixelesOcupados() {
         return Collections.singletonList(this);
     }
 
-
+    @Override
+    public void vaciar() {
+        this.changeState(new casillaVacia());
+    }
 
     public void notificarDestruccion() {
-        // Notificar a los observers registrados en ESTE píxel (managers) pasando solo coordenadas.
+        // Notificar a los observers registrados en ESTE píxel (managers) pasando el objeto Pixel directamente.
         setChanged();
-        notifyObservers(new int[]{x, y});
+        notifyObservers(this);
     }
 
 

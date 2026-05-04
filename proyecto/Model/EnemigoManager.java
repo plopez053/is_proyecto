@@ -16,6 +16,7 @@ public class EnemigoManager implements Observer {
     private int direccionBoss = 1; // 1 = derecha, -1 = izquierda
     private Timer timerBoss;
     private Timer timerEnemigos;
+    private List<Composite> disparosBoss = new ArrayList<>();
 
     private EnemigoManager() {
         enemigos = new ArrayList<>();
@@ -143,8 +144,6 @@ public class EnemigoManager implements Observer {
         }
     }
 
-    
-
     public void matarEnemigoEnCoordenada(int x, int y) {
         Enemigo aEliminar = getEnemigoEn(x, y);
         if (aEliminar != null) {
@@ -157,7 +156,7 @@ public class EnemigoManager implements Observer {
         if (e.getNave() != null) {
             e.getNave().removeNave();
             if (e.getNave().getCuerpo() != null) {
-                e.getNave().getCuerpo().borrar();
+                e.getNave().getCuerpo().vaciar();
             }
         }
         // Cuando caen todos los enemigos, aparece el boss
@@ -167,7 +166,8 @@ public class EnemigoManager implements Observer {
         }
     }
 
-    /** Registrar todos los píxeles de un Composite para que este manager reciba
+    /**
+     * Registrar todos los píxeles de un Composite para que este manager reciba
      * notificaciones de destrucción desde los píxeles.
      */
     public void registerComposite(Composite c) {
@@ -178,6 +178,7 @@ public class EnemigoManager implements Observer {
                 p.addObserver(this);
         }
     }
+
     public void spawnBoss() {
         int centroX = GameBoard.getGameBoard().getWidth() / 2;
         boss = (FinalBoss) NaveFactory.getNaveFactory().crearNave("BOSS", centroX, 5);
@@ -185,24 +186,56 @@ public class EnemigoManager implements Observer {
             boss.getCuerpo().asignar();
         }
         iniciarTimerBoss();
-        GameBoard.getGameBoard().actualizarTablero();
     }
 
     private void iniciarTimerBoss() {
-        if (timerBoss != null) timerBoss.cancel();
+        if (timerBoss != null)
+            timerBoss.cancel();
         timerBoss = new Timer();
         timerBoss.schedule(new TimerTask() {
-            @Override public void run() { moverBoss(); }
-        }, 500, 300);
+            @Override
+            public void run() {
+                moverBoss();
+                moverDisparosBoss(); // <-- Mueve los disparos en cada tick
+            }
+        }, 500, 150);
     }
 
     private void moverBoss() {
-        if (boss == null || !boss.estaViva()) return;
+        if (boss == null || !boss.estaViva())
+            return;
+
+        int dy = 0;
+        // Si choca lateralmente, cambia de dirección y baja una casilla
         if (!boss.getCuerpo().canMove(direccionBoss, 0)) {
             direccionBoss *= -1;
+            dy = 1;
         }
-        boss.mover(direccionBoss, 0);
-        GameBoard.getGameBoard().actualizarTablero();
+        boss.mover(direccionBoss, dy); // Patrón Composite
+
+        // Probabilidad de disparo (ej. 20% en cada tick)
+        if (random.nextInt(10) < 2) {
+            dispararBoss();
+        }
+    }
+
+    private void dispararBoss() {
+        if (boss != null && boss.estaViva()) {
+            Composite disparos = boss.disparar();
+            if (disparos != null) {
+                disparosBoss.add(disparos);
+                registerComposite(disparos); // Patrón Observer: escucha colisiones
+                disparos.asignar(); // Renderiza en el GameBoard
+            }
+        }
+    }
+
+    private void moverDisparosBoss() {
+        // Evita ConcurrentModificationException iterando sobre una copia
+        List<Composite> copia = new ArrayList<>(disparosBoss);
+        for (Composite c : copia) {
+            c.mover(0, 1); // Eje Y positivo (hacia abajo)
+        }
     }
 
     public void notificarDestruccionBoss(FinalBoss b) {
@@ -211,48 +244,56 @@ public class EnemigoManager implements Observer {
             timerBoss = null;
         }
         boss = null;
-        b.getCuerpo().borrar();
-        GameBoard.getGameBoard().actualizarTablero();
-        // Para notificar victoria habria q agregar algo aqui
+        b.getCuerpo().vaciar();
+
+        // Limpiar los disparos huérfanos
+        for (Composite c : disparosBoss) {
+            c.vaciar();
+        }
+        disparosBoss.clear();
+
+        // Lanzar la victoria a nivel global
+        GameBoard.getGameBoard().ganarJuego();
     }
+
     @Override
     public void update(Observable o, Object arg) {
-        if (arg instanceof int[]) {
-            int[] coords = (int[]) arg;
-            int x = coords[0];
-            int y = coords[1];
+        if (arg instanceof Pixel) {
+            Pixel p = (Pixel) arg;
 
-            // Primero comprobar si es el boss
+            // 1. Comprobar si es el boss
             if (boss != null && boss.estaViva()) {
-                for (Pixel p : boss.getPixelesOcupados()) {
-                    if (p.getX() == x && p.getY() == y) {
-                        boss.recibirImpacto(); 
-                        return;
-                    }
+                if (boss.getPixelesOcupados().contains(p)) {
+                    boss.recibirImpacto();
+                    return;
                 }
             }
 
-            // Si no, buscar enemigo normal
+            // 2. Comprobar si es un disparo del boss
+            Composite disparoAEliminar = null;
+            for (Composite c : disparosBoss) {
+                if (c.getPixelesOcupados().contains(p)) {
+                    disparoAEliminar = c;
+                    break;
+                }
+            }
+            if (disparoAEliminar != null) {
+                disparosBoss.remove(disparoAEliminar);
+                disparoAEliminar.vaciar();
+                return; // Cortar ejecución si ya se eliminó el disparo
+            }
+
+            // 3. Si no, buscar enemigo normal
             Enemigo aEliminar = null;
             for (Enemigo e : new ArrayList<>(enemigos)) {
-                for (Pixel p : e.getPixelesOcupados()) {
-                    if (p.getX() == x && p.getY() == y) {
-                        aEliminar = e;
-                        break;
-                    }
+                if (e.getPixelesOcupados().contains(p)) {
+                    aEliminar = e;
+                    break;
                 }
-                if (aEliminar != null) break;
             }
-            if (aEliminar != null) removeEnemigo(aEliminar);
+            if (aEliminar != null)
+                removeEnemigo(aEliminar);
         }
-        
-
     }
-    
 
-
-    
-    
-   
 }
-

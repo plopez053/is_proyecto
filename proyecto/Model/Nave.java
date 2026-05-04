@@ -6,25 +6,19 @@ import java.util.List;
 public abstract class Nave {
     protected boolean viva = true;
     protected Composite cuerpo;
+    protected int x, y;
 
     public Nave(int x, int y) {
-        // Inicializamos sin guardar x,y locales
+        this.x = x;
+        this.y = y;
     }
 
     public int getX() {
-        List<Pixel> pixeles = getPixelesOcupados();
-        if (!pixeles.isEmpty()) {
-            return pixeles.get(0).getX();
-        }
-        return 0;
+        return x;
     }
 
     public int getY() {
-        List<Pixel> pixeles = getPixelesOcupados();
-        if (!pixeles.isEmpty()) {
-            return pixeles.get(0).getY();
-        }
-        return 0;
+        return y;
     }
 
     public void setCuerpo(Composite cuerpo) {
@@ -46,6 +40,8 @@ public abstract class Nave {
 
         if (cuerpo != null) {
             cuerpo.mover(dx, dy);
+            this.x += dx;
+            this.y += dy;
         }
     }
 

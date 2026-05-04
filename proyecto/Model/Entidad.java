@@ -10,9 +10,5 @@ public interface Entidad {
     void asignar();
 
     void borrar();
-
-    List<Pixel> getPixelesOcupados();
-
-
-
+    void vaciar();
 }

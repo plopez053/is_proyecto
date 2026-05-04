@@ -78,7 +78,7 @@ public class PantallaJuego extends JFrame implements Observer {
 				labels[i][j] = label;
 			}
 		}
-		armaLabel = new JLabel("Arma: -    Munición: -");
+		armaLabel = new JLabel("Arma: -    Municion: -");
         armaLabel.setForeground(Color.WHITE);
         armaLabel.setFont(armaLabel.getFont().deriveFont(14f));
         armaLabel.setBorder(BorderFactory.createEmptyBorder(4, 10, 4, 10));
@@ -96,108 +96,52 @@ public class PantallaJuego extends JFrame implements Observer {
 	}
 
 	private class Controlador2 implements KeyListener, WindowListener {
-		// Tras pulsar el botÃ³n, abrir la otra pantalla
 		@Override
 		public void keyPressed(KeyEvent e) {
-
 			int key = e.getKeyCode();
 				if (key == KeyEvent.VK_LEFT) {
 					JugadorManager.getJugadorManager().moverNave(-1, 0);
 				}
-
 				if (key == KeyEvent.VK_RIGHT) {
 					JugadorManager.getJugadorManager().moverNave(1, 0);
 				}
-
 				if (key == KeyEvent.VK_UP) {
 					JugadorManager.getJugadorManager().moverNave(0, -1);
 				}
 				if (key == KeyEvent.VK_DOWN) {
 					JugadorManager.getJugadorManager().moverNave(0, 1);
 				}
-
 				if (key == KeyEvent.VK_SPACE) {
 					JugadorManager.getJugadorManager().disparar();
-					actualizarHUD();
 				}
-
-				if (  key == KeyEvent.VK_C) {
+				if (key == KeyEvent.VK_C) {
 					JugadorManager.getJugadorManager().cambiarArma();
-					actualizarHUD();
 				}
-				GameBoard.getGameBoard().actualizarTablero();
-			
 		}
 
-		@Override
-		public void keyTyped(KeyEvent e) {
-			// TODO Auto-generated method stub
-
-		}
-
-		@Override
-		public void keyReleased(KeyEvent e) {
-			// TODO Auto-generated method stub
-
-		}
-
-		@Override
-		public void windowOpened(WindowEvent e) {
-			GameBoard.getGameBoard().actualizarTablero();
-			actualizarHUD();
-		}
-
-		@Override
-		public void windowClosing(WindowEvent e) {
-			// TODO Auto-generated method stub
-
-		}
-
-		@Override
-		public void windowClosed(WindowEvent e) {
-			// TODO Auto-generated method stub
-
-		}
-
-		@Override
-		public void windowIconified(WindowEvent e) {
-			// TODO Auto-generated method stub
-
-		}
-
-		@Override
-		public void windowDeiconified(WindowEvent e) {
-			// TODO Auto-generated method stub
-
-		}
-
-		@Override
-		public void windowActivated(WindowEvent e) {
-			// TODO Auto-generated method stub
-
-		}
-
-		@Override
-		public void windowDeactivated(WindowEvent e) {
-			// TODO Auto-generated method stub
-
-		}
-
+		@Override public void keyTyped(KeyEvent e) {}
+		@Override public void keyReleased(KeyEvent e) {}
+		@Override public void windowOpened(WindowEvent e) {}
+		@Override public void windowClosing(WindowEvent e) {}
+		@Override public void windowClosed(WindowEvent e) {}
+		@Override public void windowIconified(WindowEvent e) {}
+		@Override public void windowDeiconified(WindowEvent e) {}
+		@Override public void windowActivated(WindowEvent e) {}
+		@Override public void windowDeactivated(WindowEvent e) {}
 	}
 	
-	private void actualizarHUD() {
-	    String nombre = JugadorManager.getJugadorManager().getNombreArmaActual();
-	    String municion = JugadorManager.getJugadorManager().getMunicionArmaActual();
-	    armaLabel.setText("Arma: " + nombre + "    Munición: " + municion + "    [C] cambiar");
-	}
-	    
 	@Override
 	public void update(Observable o, Object arg) {
 		if (arg instanceof Object[] && labels != null) {
 			Object[] total = (Object[]) arg;
 			int fin = (int) total[0];
 			int[][] snapshot = (int[][]) total[1];
+			
+			String nombre = (total.length > 2) ? (String) total[2] : "-";
+			String municion = (total.length > 3) ? (String) total[3] : "-";
+
 			SwingUtilities.invokeLater(() -> {
+				armaLabel.setText("Arma: " + nombre + "    Municion: " + municion + "    [C] cambiar");
 				int boardHeight = snapshot.length;
 				int boardWidth = snapshot[0].length;
 				for (int i = 0; i < boardHeight; i++) {
@@ -237,8 +181,11 @@ public class PantallaJuego extends JFrame implements Observer {
 				if (fin == 2) {
 					JOptionPane.showMessageDialog(contentPane, "GAME OVER", "TRY IT AGAIN",
 							JOptionPane.INFORMATION_MESSAGE);
-					System.exit(0); // Se cierra la pantalla. Pero igual es mejor forma hacer que al pulsar OK,
-									// vuelva a la pantalla ppal para reiniciar juego.
+					System.exit(0); 
+				} else if (fin == 3) {
+					JOptionPane.showMessageDialog(contentPane, "Â¡VICTORIA!", "HAS SALVADO LA GALAXIA",
+							JOptionPane.INFORMATION_MESSAGE);
+					System.exit(0); 
 				}
 			});
 		}

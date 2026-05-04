@@ -1,5 +1,6 @@
 package viewController;
 
+// Test comment
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.EventQueue;

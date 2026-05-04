@@ -17,5 +17,4 @@ public class Malo extends Nave {
         EnemigoManager.getEnemigoManager().notificarDestruccionNave(this);
     }
 
-    
 }

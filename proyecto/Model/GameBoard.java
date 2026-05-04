@@ -20,6 +20,7 @@ public class GameBoard extends Observable {
     private int posYInicio = 55;
     private String tipoNave;
     private boolean juegoFinalizado = false;
+    private java.util.Timer gameTimer;
 
     // --- Constructor y Singleton ---
     private GameBoard() {
@@ -94,26 +95,57 @@ public class GameBoard extends Observable {
         EnemigoManager.getEnemigoManager().spawnEnemies();
         EnemigoManager.getEnemigoManager().iniciarTimerEnemigos();
 
+        // Temporizador Centralizado (~20 FPS)
+        if (gameTimer != null) gameTimer.cancel();
+        gameTimer = new java.util.Timer();
+        gameTimer.schedule(new java.util.TimerTask() {
+            @Override
+            public void run() {
+                actualizarTablero();
+            }
+        }, 0, 50);
+
         // Notificación inicial (Tipo 1: Setup)
         setChanged();
-        notifyObservers(new Object[] { 1, getBoardActual() });
+        notifyObservers(new Object[] { 1, getBoardActual(), "-", "-" });
     }
 
     public void finalizarJuego() {
         if (!juegoFinalizado) {
             juegoFinalizado = true;
+            if (gameTimer != null) {
+                gameTimer.cancel();
+                gameTimer = null;
+            }
             EnemigoManager.getEnemigoManager().detenerTimerEnemigos();
 
             // Notificación final (Tipo 2: Game Over)
             setChanged();
-            notifyObservers(new Object[] { 2, getBoardActual() });
+            notifyObservers(new Object[] { 2, getBoardActual(), "-", "-" });
+        }
+    }
+
+    public void ganarJuego() {
+        if (!juegoFinalizado) {
+            juegoFinalizado = true;
+            if (gameTimer != null) {
+                gameTimer.cancel();
+                gameTimer = null;
+            }
+            EnemigoManager.getEnemigoManager().detenerTimerEnemigos();
+
+            // Notificamos a la vista con el estado 3 (Victoria)
+            setChanged();
+            notifyObservers(new Object[] { 3, getBoardActual(), "-", "-" });
         }
     }
 
     public void actualizarTablero() {
         if (!juegoFinalizado) {
+            String arma = JugadorManager.getJugadorManager().getNombreArmaActual();
+            String muni = JugadorManager.getJugadorManager().getMunicionArmaActual();
             setChanged();
-            notifyObservers(new Object[] { 0, getBoardActual() });
+            notifyObservers(new Object[] { 0, getBoardActual(), arma, muni });
         }
     }
 
