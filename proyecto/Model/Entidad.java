@@ -10,5 +10,6 @@ public interface Entidad {
     void asignar();
 
     void borrar();
-    void vaciar();
+
+    boolean ocupaCoordenada(int x, int y);
 }

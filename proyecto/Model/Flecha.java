@@ -14,7 +14,9 @@ public class Flecha implements EstrategiaDisparo {
             };
             Composite cuerpo = new Composite();
             for (int[] d : desplazamientos) {
-                cuerpo.addComponente(new Pixel(xCentral + d[0], yCentral + d[1], new casillaDisparo()));
+                Pixel p = new Pixel(xCentral + d[0], yCentral + d[1], new casillaDisparo());
+                p.addObserver(JugadorManager.getJugadorManager());
+                cuerpo.addComponente(p);
             }
             return cuerpo;
         }

@@ -8,8 +8,7 @@ public class CasillaBoss implements EstadoCasilla {
 
     @Override
     public void impactar(Pixel contexto) {
-      
         contexto.notificarDestruccion();
-
+        contexto.changeState(new casillaVacia());
     }
 }

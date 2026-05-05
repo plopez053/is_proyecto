@@ -6,8 +6,6 @@ public class FinalBoss extends Nave {
 
     public FinalBoss(int x, int y) {
         super(x, y);
-        Composite cuerpo = new Composite();
-
         int[][] forma = {
                 // Antenas
                 { -3, -4 }, { 3, -4 },
@@ -39,9 +37,11 @@ public class FinalBoss extends Nave {
                 // Punta de patas
                 { -9, 3 }, { -7, 3 }, { -5, 3 }, { 5, 3 }, { 7, 3 }, { 9, 3 },
         };
-
+        Composite cuerpo = new Composite();
         for (int[] d : forma) {
-            cuerpo.addComponente(new Pixel(x + d[0], y + d[1], new CasillaBoss()));
+            Pixel p = new Pixel(x + d[0], y + d[1], new CasillaBoss());
+            p.addObserver(EnemigoManager.getEnemigoManager());
+            cuerpo.addComponente(p);
         }
         this.setCuerpo(cuerpo);
     }
@@ -52,7 +52,7 @@ public class FinalBoss extends Nave {
         if (vidasRestantes <= 0) {
             removeNave();
             if (cuerpo != null)
-                cuerpo.vaciar();
+                cuerpo.borrar();
             EnemigoManager.getEnemigoManager().notificarDestruccionBoss(this);
         }
     }

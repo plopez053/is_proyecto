@@ -6,7 +6,9 @@ public class DisparoPixelStrategy implements EstrategiaDisparo {
         int shotY = yCentral - 4;
         if (shotY >= 0) {
             Composite cuerpo = new Composite();
-            cuerpo.addComponente(new Pixel(xCentral, shotY, new casillaDisparo()));
+            Pixel p = new Pixel(xCentral, shotY, new casillaDisparo());
+            p.addObserver(JugadorManager.getJugadorManager());
+            cuerpo.addComponente(p);
             return cuerpo;
         }
         return null;

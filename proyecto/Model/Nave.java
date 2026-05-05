@@ -45,12 +45,7 @@ public abstract class Nave {
         }
     }
 
-    public List<Pixel> getPixelesOcupados() {
-        if (cuerpo != null) {
-            return cuerpo.getPixelesOcupados();
-        }
-        return Collections.emptyList();
-    }
+
 
 
     public void removeNave() {
@@ -67,6 +62,10 @@ public abstract class Nave {
 
     public void cambiarArma() {
         // Por defecto no hace nada. Las naves concretas pueden sobreescribirlo.
+    }
+    
+    public EstrategiaDisparo getArmaActual() {
+        return null; 
     }
     
     public void recibirImpacto() {

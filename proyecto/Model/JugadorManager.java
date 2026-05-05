@@ -32,8 +32,6 @@ public class JugadorManager implements Observer {
         nave = NaveFactory.getNaveFactory().crearNave(tipoNave, x, y);
         disparosActivos = new ArrayList<>();
         if (nave != null && nave.getCuerpo() != null) {
-            // Registrar píxeles del cuerpo en este manager antes de asignar en el tablero
-            registerComposite(nave.getCuerpo());
             nave.getCuerpo().asignar();
         }
         iniciarTimerDisparos();
@@ -63,7 +61,7 @@ public class JugadorManager implements Observer {
         if (nave != null && nave.estaViva()) {
             nave.removeNave();
             if (nave.getCuerpo() != null) {
-                nave.getCuerpo().vaciar();
+                nave.getCuerpo().borrar();
             }
         }
     }
@@ -73,7 +71,6 @@ public class JugadorManager implements Observer {
             Composite nuevoDisparo = nave.disparar();
             if (nuevoDisparo != null) {
                 disparosActivos.add(nuevoDisparo);
-                registerComposite(nuevoDisparo);
                 nuevoDisparo.asignar();
             }
         }
@@ -82,7 +79,7 @@ public class JugadorManager implements Observer {
     public void eliminarDisparoActivo(Composite c) {
         if (disparosActivos != null && disparosActivos.contains(c)) {
             disparosActivos.remove(c);
-            c.vaciar();
+            c.borrar();
         }
     }
 
@@ -102,35 +99,14 @@ public class JugadorManager implements Observer {
     }
 
     private void moverDisparos() {
-        List<Composite> copia = new ArrayList<>(disparosActivos);
-        for (Composite c : copia) {
-            c.mover(0, -1);
-        }
+        new ArrayList<>(disparosActivos).stream().forEach(c -> c.mover(0, -1));
     }
 
     public void setTipoNave(String tipo) {
         this.tipoNave = tipo;
     }
 
-    /**
-     * Registrar todos los píxeles de un Composite para que este manager reciba
-     * notificaciones de destrucción desde los píxeles.
-     */
-    public void registerComposite(Composite c) {
-        if (c == null)
-            return;
-        for (Pixel p : c.getPixelesOcupados()) {
-            if (p != null)
-                p.addObserver(this);
-        }
-    }
 
-    /** Registrar un solo Disparo (sus píxeles) */
-    public void registerDisparo(Composite c) {
-        if (c == null)
-            return;
-        registerComposite(c);
-    }
 
     public void cambiarArma() {
         if (nave != null && nave.estaViva()) {
@@ -140,24 +116,20 @@ public class JugadorManager implements Observer {
 
     @Override
     public void update(Observable o, Object arg) {
-        if (arg instanceof Pixel) {
-            Pixel p = (Pixel) arg;
+        if (arg instanceof int[]) {
+            int[] coords = (int[]) arg;
+            int px = coords[0];
+            int py = coords[1];
             
             // Buscar y eliminar disparo activo que contenga ese pixel
-            Composite disparoAEliminar = null;
-            for (Composite c : disparosActivos) {
-                if (c != null && c.getPixelesOcupados().contains(p)) {
-                    disparoAEliminar = c;
-                    break;
-                }
-            }
-            if (disparoAEliminar != null) {
-                eliminarDisparoActivo(disparoAEliminar);
-            }
+            disparosActivos.stream()
+                .filter(c -> c != null && c.ocupaCoordenada(px, py))
+                .findFirst()
+                .ifPresent(this::eliminarDisparoActivo);
             
             // Buscar si la nave tiene ese pixel
             if (nave != null && nave.getCuerpo() != null) {
-                if (nave.getCuerpo().getPixelesOcupados().contains(p)) {
+                if (nave.getCuerpo().ocupaCoordenada(px, py)) {
                     notificarDestruccionNave();
                 }
             }
@@ -165,22 +137,16 @@ public class JugadorManager implements Observer {
     }
     
     public String getNombreArmaActual() {
-        if (nave instanceof Bueno) {
-            Bueno bueno = (Bueno) nave;
-            if (bueno.getArmaActual() != null) {
-                return bueno.getArmaActual().getNombre();
-            }
+        if (nave != null && nave.getArmaActual() != null) {
+            return nave.getArmaActual().getNombre();
         }
         return "-";
     }
 
     public String getMunicionArmaActual() {
-        if (nave instanceof Bueno) {
-            Bueno bueno = (Bueno) nave;
-            if (bueno.getArmaActual() != null) {
-                int municion = bueno.getArmaActual().getMunicion();
-                return municion == -1 ? "Municion Ilimitada" : String.valueOf(municion);
-            }
+        if (nave != null && nave.getArmaActual() != null) {
+            int municion = nave.getArmaActual().getMunicion();
+            return municion == -1 ? "Municion Ilimitada" : String.valueOf(municion);
         }
         return "-";
     }

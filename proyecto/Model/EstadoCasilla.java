@@ -26,4 +26,10 @@ public interface EstadoCasilla {
     default boolean estaOcupada() {
         return getTipo() != TipoCasilla.VACIA;
     }
+
+    default boolean puedeColisionar(EstadoCasilla otro) {
+        if (this.getTipo() == otro.getTipo()) return false;
+        if (this.getTipo() == TipoCasilla.DISPARO && otro.getTipo() == TipoCasilla.DISPARO) return false;
+        return true;
+    }
 }

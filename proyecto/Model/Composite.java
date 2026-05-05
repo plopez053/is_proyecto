@@ -24,68 +24,36 @@ public class Composite implements Entidad {
         if (componentes.isEmpty())
             return false;
         
-        Iterator<Entidad> it = componentes.iterator();
-        while (it.hasNext()) {
-            Entidad ev = it.next();
-            if (ev != null && !ev.canMove(dx, dy)) {
-                return false;
-            }
-        }
-        return true;
+        return componentes.stream().allMatch(ev -> ev == null || ev.canMove(dx, dy));
     }
  
     @Override
     public void asignar() {
-        Iterator<Entidad> it = componentes.iterator();
-        while (it.hasNext()) {
-            Entidad ev = it.next();
-            if (ev != null)
-                ev.asignar();
-        }
+        componentes.stream().filter(ev -> ev != null).forEach(Entidad::asignar);
     }
  
     @Override
     public void borrar() {
-        Iterator<Entidad> it = new ArrayList<>(componentes).iterator();
-        while (it.hasNext()) {
-            Entidad ev = it.next();
-            if (ev != null) ev.borrar();
-        }
+        new ArrayList<>(componentes).stream().filter(ev -> ev != null).forEach(Entidad::borrar);
         componentes.clear();
     }
  
-    @Override
-    public void vaciar() {
-        Iterator<Entidad> it = componentes.iterator();
-        while (it.hasNext()) {
-            Entidad ev = it.next();
-            if (ev != null) ev.vaciar();
-        }
-    }
+
  
     @Override
     public void mover(int dx, int dy) {
-        Iterator<Entidad> it = new ArrayList<>(componentes).iterator();
-        while (it.hasNext()) {
-            Entidad ev = it.next();
-            if (componentes.isEmpty()) break;
-            if (ev != null) {
-                ev.mover(dx, dy);
-            }
-        }
+        // Usamos Java 8 para iterar sobre una copia, pero filtrando si el componente sigue activo
+        new ArrayList<>(componentes).stream()
+            .filter(ev -> ev != null && componentes.contains(ev))
+            .forEach(ev -> ev.mover(dx, dy));
+    }
+
+    @Override
+    public boolean ocupaCoordenada(int x, int y) {
+        return componentes.stream()
+                .filter(c -> c != null)
+                .anyMatch(c -> c.ocupaCoordenada(x, y));
     }
  
-    public List<Pixel> getPixelesOcupados() {
-        List<Pixel> ocupadas = new ArrayList<>();
-        Iterator<Entidad> it = new ArrayList<>(componentes).iterator();
-        while (it.hasNext()) {
-            Entidad ev = it.next();
-            if (ev instanceof Pixel) {
-                ocupadas.addAll(((Pixel) ev).getPixelesOcupados());
-            } else if (ev instanceof Composite) {
-                ocupadas.addAll(((Composite) ev).getPixelesOcupados());
-            }
-        }
-        return ocupadas;
-    }
+
 }

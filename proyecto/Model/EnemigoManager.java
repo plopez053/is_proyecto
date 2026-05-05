@@ -69,20 +69,11 @@ public class EnemigoManager implements Observer {
                 }
 
                 // Chequeo de proximidad con otros enemigos (lógica de compañeros mejorada)
-                for (Enemigo e : enemigos) {
-                    if (e.getNave().getCuerpo() != null) {
-                        for (Pixel ep : e.getNave().getPixelesOcupados()) {
-                            // Si estamos a menos de 6 de distancia en X o 3 en Y de CUALQUIER píxel de otro
-                            // enemigo
-                            if (Math.abs(ep.getX() - x) < 6 && Math.abs(ep.getY() - y) < 4) {
-                                positionInvalid = true;
-                                break;
-                            }
-                        }
-                    }
-                    if (positionInvalid)
-                        break;
-                }
+                final int finalX = x;
+                final int finalY = y;
+                boolean cercaniaInvalida = enemigos.stream()
+                        .anyMatch(e -> Math.abs(e.getNave().getX() - finalX) < 6 && Math.abs(e.getNave().getY() - finalY) < 4);
+                if (cercaniaInvalida) positionInvalid = true;
             } while (positionInvalid);
 
             if (!positionInvalid) {
@@ -90,8 +81,6 @@ public class EnemigoManager implements Observer {
                 Enemigo nuevoEnemigo = new Enemigo(nuevaNave);
                 enemigos.add(nuevoEnemigo);
                 if (nuevaNave.getCuerpo() != null) {
-                    // Registrar píxeles del cuerpo en este manager antes de asignar en el tablero
-                    registerComposite(nuevaNave.getCuerpo());
                     nuevaNave.getCuerpo().asignar();
                 }
             }
@@ -103,7 +92,8 @@ public class EnemigoManager implements Observer {
         Pixel p = board.getPixel(x, y);
         if (p != null && p.getEstado().getTipo() == EstadoCasilla.TipoCasilla.ENEMIGO) {
             for (Enemigo e : enemigos) {
-                if (e.getNave().getPixelesOcupados().contains(p)) {
+                if (e.getNave() != null && e.getNave().getCuerpo() != null &&
+                    e.getNave().getCuerpo().ocupaCoordenada(x, y)) {
                     return e;
                 }
             }
@@ -112,36 +102,21 @@ public class EnemigoManager implements Observer {
     }
 
     public void notificarColisionComposite(Composite c) {
-        Enemigo aEliminar = null;
-        for (Enemigo e : enemigos) {
-            if (e.getNave().getCuerpo() == c) {
-                aEliminar = e;
-                break;
-            }
-        }
-        if (aEliminar != null) {
-            removeEnemigo(aEliminar);
-        }
+        enemigos.stream()
+            .filter(e -> e.getNave().getCuerpo() == c)
+            .findFirst()
+            .ifPresent(this::removeEnemigo);
     }
 
     public void notificarDestruccionNave(Malo nave) {
-        Enemigo aEliminar = null;
-        for (Enemigo e : enemigos) {
-            if (e.getNave() == nave) {
-                aEliminar = e;
-                break;
-            }
-        }
-        if (aEliminar != null) {
-            removeEnemigo(aEliminar);
-        }
+        enemigos.stream()
+            .filter(e -> e.getNave() == nave)
+            .findFirst()
+            .ifPresent(this::removeEnemigo);
     }
 
     public void moveEnemies() {
-        List<Enemigo> copia = new ArrayList<>(enemigos);
-        for (Enemigo e : copia) {
-            e.mover(0, 1);
-        }
+        new ArrayList<>(enemigos).stream().forEach(e -> e.mover(0, 1));
     }
 
     public void matarEnemigoEnCoordenada(int x, int y) {
@@ -156,7 +131,7 @@ public class EnemigoManager implements Observer {
         if (e.getNave() != null) {
             e.getNave().removeNave();
             if (e.getNave().getCuerpo() != null) {
-                e.getNave().getCuerpo().vaciar();
+                e.getNave().getCuerpo().borrar();
             }
         }
         // Cuando caen todos los enemigos, aparece el boss
@@ -166,18 +141,7 @@ public class EnemigoManager implements Observer {
         }
     }
 
-    /**
-     * Registrar todos los píxeles de un Composite para que este manager reciba
-     * notificaciones de destrucción desde los píxeles.
-     */
-    public void registerComposite(Composite c) {
-        if (c == null)
-            return;
-        for (Pixel p : c.getPixelesOcupados()) {
-            if (p != null)
-                p.addObserver(this);
-        }
-    }
+
 
     public void spawnBoss() {
         int centroX = GameBoard.getGameBoard().getWidth() / 2;
@@ -224,18 +188,13 @@ public class EnemigoManager implements Observer {
             Composite disparos = boss.disparar();
             if (disparos != null) {
                 disparosBoss.add(disparos);
-                registerComposite(disparos); // Patrón Observer: escucha colisiones
                 disparos.asignar(); // Renderiza en el GameBoard
             }
         }
     }
 
     private void moverDisparosBoss() {
-        // Evita ConcurrentModificationException iterando sobre una copia
-        List<Composite> copia = new ArrayList<>(disparosBoss);
-        for (Composite c : copia) {
-            c.mover(0, 1); // Eje Y positivo (hacia abajo)
-        }
+        new ArrayList<>(disparosBoss).stream().forEach(c -> c.mover(0, 1));
     }
 
     public void notificarDestruccionBoss(FinalBoss b) {
@@ -244,12 +203,10 @@ public class EnemigoManager implements Observer {
             timerBoss = null;
         }
         boss = null;
-        b.getCuerpo().vaciar();
+        b.getCuerpo().borrar();
 
         // Limpiar los disparos huérfanos
-        for (Composite c : disparosBoss) {
-            c.vaciar();
-        }
+        disparosBoss.forEach(Composite::borrar);
         disparosBoss.clear();
 
         // Lanzar la victoria a nivel global
@@ -258,41 +215,34 @@ public class EnemigoManager implements Observer {
 
     @Override
     public void update(Observable o, Object arg) {
-        if (arg instanceof Pixel) {
-            Pixel p = (Pixel) arg;
+        if (arg instanceof int[]) {
+            int[] coords = (int[]) arg;
+            int px = coords[0];
+            int py = coords[1];
 
             // 1. Comprobar si es el boss
-            if (boss != null && boss.estaViva()) {
-                if (boss.getPixelesOcupados().contains(p)) {
+            if (boss != null && boss.estaViva() && boss.getCuerpo() != null) {
+                if (boss.getCuerpo().ocupaCoordenada(px, py)) {
                     boss.recibirImpacto();
                     return;
                 }
             }
 
             // 2. Comprobar si es un disparo del boss
-            Composite disparoAEliminar = null;
-            for (Composite c : disparosBoss) {
-                if (c.getPixelesOcupados().contains(p)) {
-                    disparoAEliminar = c;
-                    break;
-                }
-            }
-            if (disparoAEliminar != null) {
-                disparosBoss.remove(disparoAEliminar);
-                disparoAEliminar.vaciar();
-                return; // Cortar ejecución si ya se eliminó el disparo
-            }
+            disparosBoss.stream()
+                .filter(c -> c.ocupaCoordenada(px, py))
+                .findFirst()
+                .ifPresent(c -> {
+                    disparosBoss.remove(c);
+                    c.borrar();
+                });
 
             // 3. Si no, buscar enemigo normal
-            Enemigo aEliminar = null;
-            for (Enemigo e : new ArrayList<>(enemigos)) {
-                if (e.getPixelesOcupados().contains(p)) {
-                    aEliminar = e;
-                    break;
-                }
-            }
-            if (aEliminar != null)
-                removeEnemigo(aEliminar);
+            enemigos.stream()
+                .filter(e -> e.getNave() != null && e.getNave().getCuerpo() != null &&
+                             e.getNave().getCuerpo().ocupaCoordenada(px, py))
+                .findFirst()
+                .ifPresent(this::removeEnemigo);
         }
     }
 

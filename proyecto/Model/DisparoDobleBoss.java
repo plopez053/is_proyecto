@@ -8,8 +8,13 @@ public class DisparoDobleBoss implements EstrategiaDisparo {
         
         Composite cuerpo = new Composite();
         // Disparo doble izquierdo y derecho
-        cuerpo.addComponente(new Pixel(xCentral - 5, shotY, new casillaDisparo()));
-        cuerpo.addComponente(new Pixel(xCentral + 5, shotY, new casillaDisparo()));
+        Pixel p1 = new Pixel(xCentral - 5, shotY, new casillaDisparo());
+        p1.addObserver(EnemigoManager.getEnemigoManager());
+        cuerpo.addComponente(p1);
+
+        Pixel p2 = new Pixel(xCentral + 5, shotY, new casillaDisparo());
+        p2.addObserver(EnemigoManager.getEnemigoManager());
+        cuerpo.addComponente(p2);
         
         return cuerpo;
     }

@@ -20,7 +20,5 @@ public class Enemigo {
         }
     }
 
-    public List<Pixel> getPixelesOcupados() {
-        return miNave != null ? miNave.getPixelesOcupados() : Collections.emptyList();
-    }
+
 }

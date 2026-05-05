@@ -1,6 +1,9 @@
 package Model;
 
 import java.util.Observable;
+import java.util.Arrays;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * GameBoard (Mediator / Observable)
@@ -20,7 +23,7 @@ public class GameBoard extends Observable {
     private int posYInicio = 55;
     private String tipoNave;
     private boolean juegoFinalizado = false;
-    private java.util.Timer gameTimer;
+    private Timer gameTimer;
 
     // --- Constructor y Singleton ---
     private GameBoard() {
@@ -77,11 +80,7 @@ public class GameBoard extends Observable {
     // --- Ciclo de Vida y Control del Juego ---
     public void clearBoard() {
         synchronized (this) {
-            for (int i = 0; i < height; i++) {
-                for (int j = 0; j < width; j++) {
-                    matrix[i][j] = null;
-                }
-            }
+            Arrays.stream(matrix).forEach(fila -> Arrays.fill(fila, null));
         }
     }
 
@@ -97,8 +96,8 @@ public class GameBoard extends Observable {
 
         // Temporizador Centralizado (~20 FPS)
         if (gameTimer != null) gameTimer.cancel();
-        gameTimer = new java.util.Timer();
-        gameTimer.schedule(new java.util.TimerTask() {
+        gameTimer = new Timer();
+        gameTimer.schedule(new TimerTask() {
             @Override
             public void run() {
                 actualizarTablero();
@@ -159,18 +158,13 @@ public class GameBoard extends Observable {
         // 1. Validaciones previas
         if (ocupante == null || !ocupante.getEstado().estaOcupada())
             return false;
-        // Ignorar colisiones entre píxeles del mismo tipo (State)
-        EstadoCasilla.TipoCasilla tipoMovido = movido.getEstado().getTipo();
-        EstadoCasilla.TipoCasilla tipoOcupante = ocupante.getEstado().getTipo();
-        if (tipoMovido == tipoOcupante) {
+        if (!movido.getEstado().puedeColisionar(ocupante.getEstado())) {
             return false;
         }
-        // Evitar colisiones entre disparos
-        if (tipoMovido == EstadoCasilla.TipoCasilla.DISPARO && tipoOcupante == EstadoCasilla.TipoCasilla.DISPARO)
-            return false;
 
         // 2. Detección de estado previo (para fin de juego)
-        boolean naveInvolucrada = (tipoMovido == EstadoCasilla.TipoCasilla.NAVE) || (tipoOcupante == EstadoCasilla.TipoCasilla.NAVE);
+        boolean naveInvolucrada = (movido.getEstado().getTipo() == EstadoCasilla.TipoCasilla.NAVE) || 
+                                  (ocupante.getEstado().getTipo() == EstadoCasilla.TipoCasilla.NAVE);
 
         // 3. Ejecución de la destrucción: delegar directamente al estado
         // del píxel ocupante para que procese el impacto.
