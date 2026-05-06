@@ -52,7 +52,4 @@ public class Bueno extends Nave {
         return null;
     }
 
-    public void notificarDestruccion() {
-        JugadorManager.getJugadorManager().notificarDestruccionNave();
-    }
 }

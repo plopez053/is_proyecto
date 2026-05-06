@@ -128,7 +128,7 @@ public class Pixel extends Observable implements Entidad {
     public void notificarDestruccion() {
         // Notificar a los observers registrados en ESTE píxel (managers) pasando el array de coords.
         setChanged();
-        notifyObservers(new int[]{this.x, this.y});
+        notifyObservers(new Object[]{this.x, this.y});
     }
 
 

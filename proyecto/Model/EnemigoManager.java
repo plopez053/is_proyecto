@@ -56,46 +56,33 @@ public class EnemigoManager implements Observer {
 
         for (int i = 0; i < numEnemies; i++) {
             int x, y;
-            boolean positionInvalid;
+            boolean cercaniaInvalida;
             do {
-                positionInvalid = false;
                 x = random.nextInt(board.getWidth() - 2) + 1;
                 y = random.nextInt(15);
-
-                // Comprobamos si la casilla central de spawn ya tiene algo
-                Pixel p = board.getPixel(x, y);
-                if (p != null && p.getEstado().getTipo() != EstadoCasilla.TipoCasilla.VACIA) {
-                    positionInvalid = true;
-                }
 
                 // Chequeo de proximidad con otros enemigos (lógica de compañeros mejorada)
                 final int finalX = x;
                 final int finalY = y;
-                boolean cercaniaInvalida = enemigos.stream()
-                        .anyMatch(e -> Math.abs(e.getNave().getX() - finalX) < 6 && Math.abs(e.getNave().getY() - finalY) < 4);
-                if (cercaniaInvalida) positionInvalid = true;
-            } while (positionInvalid);
+                cercaniaInvalida = enemigos.stream()
+                        .anyMatch(e -> Math.abs(e.getNave().getX() - finalX) < 6
+                                && Math.abs(e.getNave().getY() - finalY) < 4);
+            } while (cercaniaInvalida);
 
-            if (!positionInvalid) {
-                Malo nuevaNave = (Malo) NaveFactory.getNaveFactory().crearNave("Malo", x, y);
-                Enemigo nuevoEnemigo = new Enemigo(nuevaNave);
-                enemigos.add(nuevoEnemigo);
-                if (nuevaNave.getCuerpo() != null) {
-                    nuevaNave.getCuerpo().asignar();
-                }
+            Malo nuevaNave = (Malo) NaveFactory.getNaveFactory().crearNave("Malo", x, y);
+            Enemigo nuevoEnemigo = new Enemigo(nuevaNave);
+            enemigos.add(nuevoEnemigo);
+            if (nuevaNave.getCuerpo() != null) {
+                nuevaNave.getCuerpo().asignar();
             }
         }
     }
 
     public Enemigo getEnemigoEn(int x, int y) {
-        GameBoard board = GameBoard.getGameBoard();
-        Pixel p = board.getPixel(x, y);
-        if (p != null && p.getEstado().getTipo() == EstadoCasilla.TipoCasilla.ENEMIGO) {
-            for (Enemigo e : enemigos) {
-                if (e.getNave() != null && e.getNave().getCuerpo() != null &&
+        for (Enemigo e : enemigos) {
+            if (e.getNave() != null && e.getNave().getCuerpo() != null &&
                     e.getNave().getCuerpo().ocupaCoordenada(x, y)) {
-                    return e;
-                }
+                return e;
             }
         }
         return null;
@@ -103,16 +90,16 @@ public class EnemigoManager implements Observer {
 
     public void notificarColisionComposite(Composite c) {
         enemigos.stream()
-            .filter(e -> e.getNave().getCuerpo() == c)
-            .findFirst()
-            .ifPresent(this::removeEnemigo);
+                .filter(e -> e.getNave().getCuerpo() == c)
+                .findFirst()
+                .ifPresent(this::removeEnemigo);
     }
 
     public void notificarDestruccionNave(Malo nave) {
         enemigos.stream()
-            .filter(e -> e.getNave() == nave)
-            .findFirst()
-            .ifPresent(this::removeEnemigo);
+                .filter(e -> e.getNave() == nave)
+                .findFirst()
+                .ifPresent(this::removeEnemigo);
     }
 
     public void moveEnemies() {
@@ -140,8 +127,6 @@ public class EnemigoManager implements Observer {
             spawnBoss();
         }
     }
-
-
 
     public void spawnBoss() {
         int centroX = GameBoard.getGameBoard().getWidth() / 2;
@@ -215,10 +200,10 @@ public class EnemigoManager implements Observer {
 
     @Override
     public void update(Observable o, Object arg) {
-        if (arg instanceof int[]) {
-            int[] coords = (int[]) arg;
-            int px = coords[0];
-            int py = coords[1];
+        if (arg instanceof Object[]) {
+            Object[] coords = (Object[]) arg;
+            int px = (int) coords[0];
+            int py = (int) coords[1];
 
             // 1. Comprobar si es el boss
             if (boss != null && boss.estaViva() && boss.getCuerpo() != null) {
@@ -230,19 +215,19 @@ public class EnemigoManager implements Observer {
 
             // 2. Comprobar si es un disparo del boss
             disparosBoss.stream()
-                .filter(c -> c.ocupaCoordenada(px, py))
-                .findFirst()
-                .ifPresent(c -> {
-                    disparosBoss.remove(c);
-                    c.borrar();
-                });
+                    .filter(c -> c.ocupaCoordenada(px, py))
+                    .findFirst()
+                    .ifPresent(c -> {
+                        disparosBoss.remove(c);
+                        c.borrar();
+                    });
 
             // 3. Si no, buscar enemigo normal
             enemigos.stream()
-                .filter(e -> e.getNave() != null && e.getNave().getCuerpo() != null &&
-                             e.getNave().getCuerpo().ocupaCoordenada(px, py))
-                .findFirst()
-                .ifPresent(this::removeEnemigo);
+                    .filter(e -> e.getNave() != null && e.getNave().getCuerpo() != null &&
+                            e.getNave().getCuerpo().ocupaCoordenada(px, py))
+                    .findFirst()
+                    .ifPresent(this::removeEnemigo);
         }
     }
 

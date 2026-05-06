@@ -37,7 +37,6 @@ public class JugadorManager implements Observer {
         iniciarTimerDisparos();
     }
 
-
     public Nave getNave() {
         return nave;
     }
@@ -106,8 +105,6 @@ public class JugadorManager implements Observer {
         this.tipoNave = tipo;
     }
 
-
-
     public void cambiarArma() {
         if (nave != null && nave.estaViva()) {
             nave.cambiarArma();
@@ -116,17 +113,17 @@ public class JugadorManager implements Observer {
 
     @Override
     public void update(Observable o, Object arg) {
-        if (arg instanceof int[]) {
-            int[] coords = (int[]) arg;
-            int px = coords[0];
-            int py = coords[1];
-            
+        if (arg instanceof Object[]) {
+            Object[] coords = (Object[]) arg;
+            int px = (int) coords[0];
+            int py = (int) coords[1];
+
             // Buscar y eliminar disparo activo que contenga ese pixel
             disparosActivos.stream()
-                .filter(c -> c != null && c.ocupaCoordenada(px, py))
-                .findFirst()
-                .ifPresent(this::eliminarDisparoActivo);
-            
+                    .filter(c -> c != null && c.ocupaCoordenada(px, py))
+                    .findFirst()
+                    .ifPresent(this::eliminarDisparoActivo);
+
             // Buscar si la nave tiene ese pixel
             if (nave != null && nave.getCuerpo() != null) {
                 if (nave.getCuerpo().ocupaCoordenada(px, py)) {
@@ -135,7 +132,7 @@ public class JugadorManager implements Observer {
             }
         }
     }
-    
+
     public String getNombreArmaActual() {
         if (nave != null && nave.getArmaActual() != null) {
             return nave.getArmaActual().getNombre();

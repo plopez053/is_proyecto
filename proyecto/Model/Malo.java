@@ -28,8 +28,4 @@ public class Malo extends Nave {
         this.setCuerpo(cuerpo);
     }
 
-    public void notificarDestruccion() {
-        EnemigoManager.getEnemigoManager().notificarDestruccionNave(this);
-    }
-
 }
